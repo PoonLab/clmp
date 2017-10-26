@@ -17,15 +17,16 @@
 #define CMAES_POP_SIZE 100
 #define MAX_NRATES 6
 
+// ck = Chapman-Kolmogorov? <art>
 struct ck_params {
-    int nrates;
-    double *Q;
+    int nrates;  // dimensionality of Q matrix
+    double *Q;  // state transition matrix
 };
 
 struct mmpp_workspace {
     struct ck_params ckpar;
-    double *y;
-    double *P;
+    double *y;  // transition matrix cache
+    double *P;  // store transition matrices for every branch in tree
     double *L;
     double *Li;
     int *C;
@@ -256,10 +257,10 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
                   mmpp_workspace *w, int use_tips,
                   int reconstruct)
 { 
-    int i, j, rt = root(tree);
+    int i, j, rt = root(tree);  // node indices
     double lik = 0;
     int lchild, rchild, pstate, cstate, new_scale;
-    igraph_vector_int_t *children;
+    igraph_vector_int_t *children;  // vector of indices to children, assuming binary tree
 
     mmpp_workspace_set_params(w, theta);
     calculate_P(tree, nrates, theta, w, use_tips);
@@ -279,15 +280,20 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
             w->scale[i] = w->scale[lchild] + w->scale[rchild];
         }
 
+        // iterate over rate class assignments to parent node
         for (pstate = 0; pstate < nrates; ++pstate)
         {
+            // iterate over rate class assignments to child node
             for (cstate = 0; cstate < nrates; ++cstate) {
                 if (lchild != -1) {
+                    // node is internal
                     w->Li[cstate] = w->L[lchild * nrates + cstate] *
                                     w->L[rchild * nrates + cstate] *
                                     w->P[i * nrates * nrates + pstate * nrates + cstate];
+                    // last factor is probability density of first arrival
                 }
                 else {
+                    // node is terminal
                     w->Li[cstate] = w->P[i * nrates * nrates + pstate * nrates + cstate];
                 }
             }
@@ -429,6 +435,9 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
     return error;
 }
 
+
+/**
+ */
 void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta)
 {
     double rowsum = 0;
@@ -447,7 +456,7 @@ void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta)
             }
         }
         w->ckpar.Q[i * nrates + i] = -rowsum - theta[i];
-        w->y[i * nrates + i] = 1;
+        w->y[i * nrates + i] = 1;  // reset to identity matrix
     }
 }
 
@@ -477,9 +486,14 @@ void calculate_P(const igraph_t *tree, int nrates, const double *theta,
     // calculate values for each branch
     for (i = 0; i < igraph_ecount(tree); ++i)
     {
-        if (w->branch_lengths[w->bl_order[i]] != t)
+        if (w->branch_lengths[w->bl_order[i]] != t) {
+            // Evolve system d from t to (branch length), with initial vector (y) containing
+            //  values of dependent variables at time (t)
             gsl_odeiv2_driver_apply(d, &t, w->branch_lengths[w->bl_order[i]], w->y);
+        }
         igraph_edge(tree, w->bl_order[i], &from, &to);
+
+        // store matrix in y
         memcpy(&w->P[to * nrates * nrates], w->y, nrates * nrates * sizeof(double));
 
         // for non-terminal nodes, multiply by branching rate
