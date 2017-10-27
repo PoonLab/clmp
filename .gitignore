@@ -13,3 +13,7 @@ src/Makefile
 stamp-h1
 tests/.deps/
 tests/Makefile
+
+*.o
+*.lo
+
