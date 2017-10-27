@@ -26,7 +26,7 @@ struct mmpp_workspace {
     struct ck_params ckpar;
     double *y;
     double *P;
-    double *L;
+    double *L;  // vector of state likelihoods per node
     double *Li;
     int *C;
     double *pi;
@@ -314,11 +314,23 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
 double reconstruct(const igraph_t *tree, int nrates, const double *theta,
         mmpp_workspace *w, int *states, int use_tips)
 {
+    /*
+     * \param[in] tree:  tree as igraph object, to reconstruct ancestral states on
+     * \param[in] nrates:  number of rate categories estimated by MMPP
+     * \param[in] theta:  fitted MMPP parameters
+     * \param[in] w:  workspace object from mmpp_workspace_create()
+     * \param[out] states:  vector to return ancestral states
+     * \param[in] use_tips:  if 0, ignore terminal nodes
+     */
     int i, rt = root(tree), lchild, rchild;
     double lik = likelihood(tree, nrates, theta, w, use_tips, 1);
     igraph_vector_int_t *children;
 
+    // which_max from util.c, returns max of first argument (vector)
+    // assign maximum likelihood state at root
     states[rt] = which_max(&w->L[rt * nrates], nrates);
+
+    // traverse internal nodes of tree
     for (i = rt; i >= 0; --i)
     {
         children = igraph_adjlist_get(&w->al, i);
