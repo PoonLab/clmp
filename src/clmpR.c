@@ -60,12 +60,18 @@ SEXP R_clmp(SEXP nwk, SEXP nrates) {
      @arg nrates:  <input>  number of rate classes
      */
     SEXP theta;  // return parameter estimates
-    SEXP states;  // 
-    igraph_t * t1;
+    //SEXP states;  //
+    int m = INTEGER(nrates)[0];
 
     // annotate igraph object with branch lengths (edge attributes)
     igraph_i_set_attribute_table(&igraph_cattribute_table);
-    t1 = R_clmp_parse_newick(nwk);
+    igraph_t * t1 = R_clmp_parse_newick(nwk);
 
-    return(0);
+    PROTECT(theta = NEW_NUMERIC(1));
+    REAL(theta)[0] = 0.;
+    UNPROTECT(1);
+
+    igraph_destroy(t1);
+
+    return(theta);
 }
