@@ -67,5 +67,5 @@ SEXP R_clmp(SEXP nwk, SEXP nrates) {
     igraph_i_set_attribute_table(&igraph_cattribute_table);
     t1 = R_clmp_parse_newick(nwk);
 
-    return(result);
+    return(0);
 }
