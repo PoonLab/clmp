@@ -8,8 +8,8 @@
 #include <gsl/gsl_cblas.h>
 #include <igraph.h>
 
-#include "c-cmaes/cmaes_interface.h"
-#include "c-cmaes/boundary_transformation.h"
+#include "cmaes_interface.h"
+#include "boundary_transformation.h"
 #include "mmpp.h"
 #include "tree.h"
 #include "util.h"
