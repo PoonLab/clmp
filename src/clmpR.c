@@ -53,25 +53,57 @@ igraph_t * R_clmp_parse_newick(SEXP newick) {
     return tree;
 }
 
-SEXP R_clmp(SEXP nwk, SEXP nrates) {
+SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg) {
     /*
      Implement MMPP method
      @arg nwk:  <input> Newick tree string
      @arg nrates:  <input>  number of rate classes
      */
-    SEXP theta;  // return parameter estimates
-    //SEXP states;  //
-    int m = INTEGER(nrates)[0];
+    SEXP result;  // return parameter estimates
+    int nrates = INTEGER(nrates_arg)[0];
+    double *theta = malloc(nrates * nrates * sizeof(double));
+    int i, error, *states, *clusters;
+
+    //TODO: implement bounds
+    SEXP bounds = PROTECT(allocVector(REALSXP, 4));
+    for (i=0; i<4; i++) {
+        REAL(bounds)[i] = REAL(bounds_arg)[i];
+    }
+    UNPROTECT(1);
 
     // annotate igraph object with branch lengths (edge attributes)
     igraph_i_set_attribute_table(&igraph_cattribute_table);
-    igraph_t * t1 = R_clmp_parse_newick(nwk);
+    igraph_t * tree = R_clmp_parse_newick(nwk);
 
-    PROTECT(theta = NEW_NUMERIC(1));
-    REAL(theta)[0] = 0.;
+    // allocate vectors given number of nodes in tree
+    states = malloc(igraph_vcount(tree) * sizeof(int));
+    clusters = malloc(igraph_vcount(tree) * sizeof(int));
+
+    // run MMPP analysis
+    error = fit_mmpp(tree, &nrates, &theta, FALSE, NULL,
+            states, LRT, 0, REAL(bounds));
+
+    //display_results(nrates, theta, branch_scale);
+
+    get_clusters(tree, states, clusters, 1);
+
+
+    /*
+    for (i = 0; i < igraph_vcount(tree); ++i)
+    {
+        fprintf(opts.output, "%s\t%e\t%d\n", VAS(tree, "id", i),
+                theta[states[i]] * branch_scale, clusters[i]);
+    }
+    */
+
+    // free up memory
+    igraph_destroy(tree);
+
+
+    // prepare return object
+    PROTECT(result = NEW_NUMERIC(1));
+    REAL(result)[0] = 0.;
     UNPROTECT(1);
 
-    igraph_destroy(t1);
-
-    return(theta);
+    return(result);
 }
