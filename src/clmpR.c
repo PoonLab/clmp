@@ -90,7 +90,7 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg) {
     // run MMPP analysis
     error = fit_mmpp(tree, &nrates, &theta, FALSE, NULL,
             states, LRT, 0, REAL(bounds));
-    //display_results(nrates, theta, branch_scale);
+    display_results(nrates, theta, 1.);
 
     get_clusters(tree, states, clusters, 1);
 
