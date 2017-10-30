@@ -7,6 +7,7 @@ Author: {Rosemary M McCloskey, Art FY Poon}
 Maintainer: Art FY Poon <artpoon@gmail.com>
 Depends:
     ape
+    phangorn
 Description:  placeholder
 License: GPL-3
 Encoding: UTF-8
