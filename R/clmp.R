@@ -1,5 +1,5 @@
 
-clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), scale='none') {
+clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), scale='none', trace=FALSE) {
   # Make sure that the tree argument is an ape phylo object
   if (class(tree) != 'phylo') {
     if (class(tree) == 'character') {
@@ -14,31 +14,35 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), scale='none') {
   }
 
   # pre-process tree
-  tree <- multi2di(tree)  # resolve polytomies
-  if (!is.rooted(tree)) {
+  tree2 <- multi2di(tree)  # resolve polytomies
+  if (!is.rooted(tree2)) {
     # no root, use midpoint rooting
-    tree <- midpoint(tree)
+    tree2 <- midpoint(tree2)
   }
-  ladderize(tree)
-  tree$edge.length[tree$edge.length<0] <- 0  # zero out negative branch lengths
+  ladderize(tree2)
+  tree2$edge.length[tree2$edge.length<0] <- 0  # zero out negative branch lengths
 
   # create arbitrary internal node labels if not already present
   if(is.null(tree$node.label)) {
-    tree$node.label <- paste0("Node", 1:Nnode(tree))
+    tree2$node.label <- paste0("Node", 1:Nnode(tree2))
   }
 
   # rescale branch lengths if requested by user
   scale.factor <- 1.
   if (scale == 'mean') {
-    scale.factor <- mean(tree$edge.length)
+    scale.factor <- mean(tree2$edge.length)
   }
   if (scale == 'median') {
-    scale.factor <- median(tree$edge.length)
+    scale.factor <- median(tree2$edge.length)
   }
-  tree$edge.length <- tree$edge.length / scale.factor
+  tree2$edge.length <- tree2$edge.length / scale.factor
 
   # serialize tree (defaults to stdout)
-  nwk <- write.tree(tree)
+  nwk <- write.tree(tree2)
 
-  .Call("R_clmp", nwk, nrates, bounds, PACKAGE='clmp')
+  res <- .Call("R_clmp", nwk, nrates, bounds, as.double(trace), PACKAGE='clmp')
+
+  # TODO: annotate tree with rate class assignments
+
+  return(list(tree=tree2, result=res))
 }

@@ -1,14 +1,16 @@
 #include <igraph.h>
 #include <igraph_error.h>
 
+#include "util.h"
+#include "newick_parser.h"
+#include "tree.h"
+#include "mmpp.h"
+
 #define USE_RINTERNALS
 #include <R.h>
 #include <Rinternals.h>
 #include <Rdefines.h>
 
-#include "newick_parser.h"
-#include "tree.h"
-#include "mmpp.h"
 
 void yy_scan_string(const char *);
 
@@ -53,7 +55,42 @@ igraph_t * R_clmp_parse_newick(SEXP newick) {
     return tree;
 }
 
-SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg) {
+
+
+void display_results(int nrates, double *theta, double branch_scale)
+{
+    // from Rosemary's pcbr.c (github.com/rmcclosk/netabc)
+    int i, j;
+    int *rate_order = malloc(nrates * sizeof(int));
+
+    order(theta, rate_order, sizeof(double), nrates, compare_doubles);
+
+    fprintf(stderr, "rates: ");
+    for (i = 0; i < nrates; ++i)
+	    fprintf(stderr, "%f ", theta[rate_order[i]] * branch_scale);
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "Q: ");
+    for (i = 0; i < nrates; ++i) {
+        fprintf(stderr, "[ ");
+        for (j = 0; j < nrates; ++j) {
+            if (i == j)
+                fprintf(stderr, "   *   ");
+            else if (i > j)
+	            fprintf(stderr, "%f", theta[nrates + rate_order[i]*(nrates-1) + rate_order[j]] * branch_scale);
+            else
+	            fprintf(stderr, "%f", theta[nrates + rate_order[i]*(nrates-1) + rate_order[j] - 1] * branch_scale);
+        }
+        if (i < nrates - 1)
+            fprintf(stderr, " ]\n   ");
+        else
+            fprintf(stderr, " ]\n");
+    }
+    free(rate_order);
+}
+
+
+SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
     /*
      Implement MMPP method
      @arg nwk:  <input> Newick tree string
@@ -63,8 +100,12 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg) {
     SEXP names;
 
     int nrates = (int) REAL(nrates_arg)[0];
+    int trace = (int) REAL(trace_arg)[0];
+
+    fprintf(stdout, "trace=%d\n", trace);
+
     double *theta = malloc(nrates * nrates * sizeof(double));
-    int i, error, *states, *clusters;
+    int i, j, error, *states, *clusters;
     int nnodes;
 
     //TODO: implement bounds
@@ -88,8 +129,10 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg) {
     clusters = malloc(igraph_vcount(tree) * sizeof(int));
 
     // run MMPP analysis
-    error = fit_mmpp(tree, &nrates, &theta, FALSE, NULL,
+    error = fit_mmpp(tree, &nrates, &theta, trace, NULL,
             states, LRT, 0, REAL(bounds));
+
+
     display_results(nrates, theta, 1.);
 
     get_clusters(tree, states, clusters, 1);

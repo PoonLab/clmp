@@ -6,8 +6,8 @@ Date: 2016-10-20
 Author: {Rosemary M McCloskey, Art FY Poon}
 Maintainer: Art FY Poon <artpoon@gmail.com>
 Depends:
-    ape
+    ape,
     phangorn
-Description:  placeholder
+Description:  CLustering with Markov-modulated Poisson processes (clmp) is an R package that implements a parametric method for extracting clusters from a phylogeny based on variation in branching rates.
 License: GPL-3
 Encoding: UTF-8
