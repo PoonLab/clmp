@@ -9,28 +9,20 @@ Loading required package: clmp
 Loading required package: ape
 Loading required package: phangorn
 
-> t1 <- read.tree('examples/structSIR.n500.nwk')
-> t1
-
-Phylogenetic tree with 492 tips and 491 internal nodes.
-
-Tip labels:
-	T96_I_0_Sampling, T95_I_0_Sampling, T94_I_0_Sampling, T93_I_0_Sampling, T92_I_0_Sampling, T91_I_0_Sampling, ...
-Node labels:
-	Node1, Node9, Node8, Node7, Node6, Node5, ...
-
-Rooted; includes branch lengths.
-
+> t1 <- read.tree('examples/test.nwk')  # a simulated tree with 1000 tips, 100 in clusters
 > res <- clmp(t1)
-log likelihood for 2 state model is 903.303757
-rates: 170.256367 481.467274 
-Q: [    *   2.990365 ]
-   [ 6.715850   *    ]
+log likelihood for 2 state model is 2238.543290
+rates: 495.368085 1305.115860 
+Q: [    *   2.526691 ]
+   [ 23.309483   *    ]
 
-> table(res)
-res
-  0   1 
-904  79 
+> index <- match(t1$tip.label, names(res))
+> labels <- grepl("_1_", t1$tip.label)
+>> table(labels, res[index])
+       
+labels    0   1
+  FALSE 860   3
+  TRUE   13  98
 ```
 
 ## Prerequisites
