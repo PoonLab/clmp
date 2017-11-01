@@ -1,6 +1,6 @@
 # clmp
 
-clmp is an R package for extracting genetic clusters from a phylogeny using a Markov-modulated Poisson process to model variation in branching rates.
+`clmp` is an R extension, mostly written in C, for extracting [genetic clusters](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5210024/) from a [phylogeny](https://en.wikipedia.org/wiki/Phylogenetic_tree) using a [Markov-modulated Poisson process](http://giantoak.github.io/MMPP_Tutorial/) to model variation in branching rates.
 
 ## Usage
 ```R
@@ -27,7 +27,7 @@ labels    0   1
 
 ## Prerequisites
 
-* [R](cran.r-project.org), obviously!
+* [R](http://cran.r-project.org), obviously!
 * [ape](https://cran.r-project.org/web/packages/ape/index.html)
 * [phangorn](https://cran.r-project.org/web/packages/phangorn/index.html)
 
