@@ -16,13 +16,13 @@ rates: 495.368085 1305.115860
 Q: [    *   2.526691 ]
    [ 23.309483   *    ]
 
-> index <- match(t1$tip.label, names(res))
-> labels <- grepl("_1_", t1$tip.label)
->> table(labels, res[index])
-       
+> index <- match(t1$tip.label, names(res))  
+> labels <- grepl("_1_", t1$tip.label)  # extract truth from the tip labels
+> table(labels, res[index])
+      
 labels    0   1
-  FALSE 860   3
-  TRUE   13  98
+  FALSE 860   3  # false positive rate, 3/(3+860)=0.34%
+  TRUE   13  98  # true positive rate, 98/(98+13)=88.2%
 ```
 
 ## Prerequisites
