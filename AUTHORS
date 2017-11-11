@@ -1,2 +1,6 @@
-Rosemary McCloskey <rmcclosk.math@gmail.com>
+Rosemary McCloskey <rmcclosk.math@gmail.com> implemented the MMPP model in C.  This project is forked from her original repository at github.com/rmcclosk/netabc
+
 Art Poon <artpoon@gmail.com>
+Tammy Ng
+
+The midpoint rooting function was authored by Klaus Vigo (@KlausVigo) as a component of the R package [phangorn](https://github.com/KlausVigo/phangorn).
