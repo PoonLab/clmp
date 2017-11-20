@@ -1,6 +1,12 @@
 # clmp
 
 `clmp` is an R extension, mostly written in C, for extracting [genetic clusters](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5210024/) from a [phylogeny](https://en.wikipedia.org/wiki/Phylogenetic_tree) using a [Markov-modulated Poisson process](http://giantoak.github.io/MMPP_Tutorial/) to model variation in branching rates.
+Our paper that describes and evaluates MMPP as a model-based clustering method for HIV epidemiology was recently accepted in [PLOS Computational Biology](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005868).
+
+## Background
+A genetic cluster is a subset of nucleotide or amino acid sequences that are more similar to each other than to the remaining sequences in the sample population.
+For infectious diseases, a genetic cluster may correspond to an outbreak of cases that are clustered in space and/or time, which can imply that the cases are related by a common source. 
+
 
 ## Usage
 ```R
