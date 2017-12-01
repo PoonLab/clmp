@@ -78,7 +78,7 @@
     brew install igraph
     ```
     
-## Kaphi Installation Procedure (Ubuntu and Mac):
+## clmp Installation Procedure (Ubuntu and Mac):
 
 * Navigate to your preferred location in the filesystem and clone clmp from the GitHhub repository
     ```
