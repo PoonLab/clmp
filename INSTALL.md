@@ -3,7 +3,6 @@
 * [R software environment](https://cran.r-project.org/)
 * R packages
   * [ape](http://ape-package.ird.fr/)
-  * [phangorn](https://cran.r-project.org/web/packages/phangorn/index.html)
   * [ggtree](https://bioconductor.org/packages/release/bioc/html/ggtree.html)
 * C libraries:
   * [GNU Scientific Library](https://www.gnu.org/software/gsl/)
@@ -28,7 +27,6 @@
     ```
     R
     install.packages("ape")
-    install.packages("phangorn")
     source("https://bioconductor.org/biocLite.R")
     biocLite("ggtree")
     quit() 
@@ -67,7 +65,6 @@
     ```
     R
     install.packages("ape")
-    install.packages("phangorn")
     source("https://bioconductor.org/biocLite.R")
     biocLite("ggtree")
     quit()
