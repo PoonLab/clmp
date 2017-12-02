@@ -7,6 +7,7 @@
 * C libraries:
   * [GNU Scientific Library](https://www.gnu.org/software/gsl/)
   * [C-igraph](http://igraph.org/c/)
+  * [flex](https://github.com/westes/flex)
 
 
 ## Requirements Installation Procedure (Ubuntu):
@@ -36,6 +37,7 @@
     sudo apt-get install libgsl-dev
     sudo apt-get install libigraph0v5
     sudo apt-get install libigraph0-dev
+    sudo apt-get install flex
     ```
 
 ## Requirements Installation Procedure (Mac):
@@ -73,6 +75,7 @@
     ```
     brew install gsl
     brew install igraph
+    brew install flex
     ```
     
 ## clmp Installation Procedure (Ubuntu and Mac):
