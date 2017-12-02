@@ -35,7 +35,7 @@ labels    0   1
 
 * [R](http://cran.r-project.org), obviously!
 * [ape](https://cran.r-project.org/web/packages/ape/index.html)
-* [phangorn](https://cran.r-project.org/web/packages/phangorn/index.html)
+* [ggtree](https://bioconductor.org/packages/release/bioc/html/ggtree.html)
 
 For compiling from source (developers only!):
 * [GSL](http://www.gnu.org/software/gsl/)
