@@ -15,15 +15,15 @@ Loading required package: clmp
 Loading required package: ape
 
 > t1 <- read.tree('examples/test.nwk')  # a simulated tree with 1000 tips, 100 in clusters
-> res <- clmp(t1)
+> res <- clmp(t1)  # returns an ape::phylo tree object 
 log likelihood for 2 state model is 2238.543290
 rates: 495.368085 1305.115860 
 Q: [    *   2.526691 ]
    [ 23.309483   *    ]
 
-> index <- match(t1$tip.label, names(res))  
+> index <- match(t1$tip.label, names(res$clusters))  
 > labels <- grepl("_1_", t1$tip.label)  # extract truth from the tip labels
-> table(labels, res[index])
+> table(labels, res$clusters[index])
       
 labels    0   1
   FALSE 860   3  # false positive rate, 3/(3+860)=0.34%
