@@ -13,7 +13,6 @@ For infectious diseases, a genetic cluster may correspond to an outbreak of case
 > require(clmp)
 Loading required package: clmp
 Loading required package: ape
-Loading required package: phangorn
 
 > t1 <- read.tree('examples/test.nwk')  # a simulated tree with 1000 tips, 100 in clusters
 > res <- clmp(t1)
@@ -31,13 +30,6 @@ labels    0   1
   TRUE   13  98  # true positive rate, 98/(98+13)=88.2%
 ```
 
-## Prerequisites
+## Installation
 
-* [R](http://cran.r-project.org), obviously!
-* [ape](https://cran.r-project.org/web/packages/ape/index.html)
-* [ggtree](https://bioconductor.org/packages/release/bioc/html/ggtree.html)
-
-For compiling from source (developers only!):
-* [GSL](http://www.gnu.org/software/gsl/)
-* [igraph](https://github.com/igraph/igraph) - note this is C-igraph, not the igraph package that is available for R.
-
+For step-by-step instructions to compile the `clmp` R package from source, please refer to our [installation documentation](INSTALL.md).
