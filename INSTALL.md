@@ -84,7 +84,7 @@
     ```
     git clone https://github.com/PoonLab/clmp
     ```
-* Compile and install Kaphi
+* Compile and install the R package `clmp`
     ```
     R CMD INSTALL clmp
     ```
