@@ -101,9 +101,6 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
 
     int nrates = (int) REAL(nrates_arg)[0];
     int trace = (int) REAL(trace_arg)[0];
-
-    fprintf(stdout, "trace=%d\n", trace);
-
     double *theta = malloc(nrates * nrates * sizeof(double));
     int i, j, error, *states, *clusters;
     int nnodes;
