@@ -86,6 +86,8 @@
     ```
 * Compile and install the R package `clmp`
     ```
+    autoconf
+    ./configure
     R CMD INSTALL clmp
     ```
 
