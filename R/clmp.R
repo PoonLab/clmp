@@ -81,3 +81,7 @@ plot.clmp <- function(obj, ...) {
     ggtree(obj, aes(color=df$cluster))
   }
 }
+
+as.phylo.clmp <- function(obj, ...) {
+  obj  # override as.phylo() which rejects derived class objects
+}
