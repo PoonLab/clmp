@@ -1,5 +1,5 @@
-#include <igraph.h>
-#include <igraph_error.h>
+#include <igraph/igraph.h>
+#include <igraph/igraph_error.h>
 
 #include "util.h"
 #include "newick_parser.h"
