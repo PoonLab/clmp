@@ -1,6 +1,6 @@
 AC_INIT()
 
-CLMP_CPPFLAGS="-I/opt/local/include/igraph -I/usr/local/include/igraph -I/usr/include/igraph"
+CLMP_CPPFLAGS="-I/opt/local/include -I/usr/local/include -I/usr/include/igraph"
 
 LIBS="-ligraph -L/usr/local/lib -L/opt/local/lib -lgsl"
 if test `uname` = "Darwin" ; then
