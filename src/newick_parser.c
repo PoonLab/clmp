@@ -67,7 +67,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #include "util.h"
 

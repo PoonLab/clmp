@@ -6,7 +6,7 @@
 #ifndef MMPP_H
 #define MMPP_H
 
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #include "stats.h"
 

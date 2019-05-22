@@ -4,7 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <gsl/gsl_rng.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #include "util.h"
 

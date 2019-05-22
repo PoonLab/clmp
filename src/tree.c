@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_statistics.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #include "newick_parser.h"
 #include "tree.h"

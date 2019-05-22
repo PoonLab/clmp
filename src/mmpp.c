@@ -6,7 +6,7 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_cblas.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #include "cmaes_interface.h"
 #include "boundary_transformation.h"
