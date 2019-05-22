@@ -2,5 +2,6 @@ export(clmp)
 export(print.clmp)
 export(summary.clmp)
 export(plot.clmp)
+export(as.phylo.clmp)
 
 useDynLib(clmp)

@@ -259,6 +259,10 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
                   mmpp_workspace *w, int use_tips,
                   int reconstruct)
 { 
+    // likelihoods are stored in linearized vector w->L 
+    //   e.g., if nrates = 3, node i=0 likelihoods stored in 0, 1, 2
+    //         node i=1 likelihoods stored in 3, 4, 5
+    
     int i, j, rt = root(tree);  // node indices
     double lik = 0;
     int lchild, rchild, pstate, cstate, new_scale;
@@ -308,13 +312,14 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
                 w->L[i * nrates + pstate] = sum_doubles(w->Li, nrates);
             }
         }
+        // rescale log-likelihoods for i-th node
         new_scale = get_scale(&w->L[i * nrates], nrates);
         for (pstate = 0; pstate < nrates; ++pstate) {
             w->L[i * nrates + pstate] /= pow(10, new_scale);
         }
         w->scale[i] += new_scale;
     }
-
+    // from utils.c
     lik = (reconstruct ? max_doubles : sum_doubles)(&w->L[rt * nrates], nrates);
     return log10(lik) + w->scale[rt];
 }
@@ -473,6 +478,7 @@ void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta)
         w->y[i * nrates + i] = 1;  // reset to identity matrix
     }
 }
+
 
 void calculate_P(const igraph_t *tree, int nrates, const double *theta,
         struct mmpp_workspace *w, int use_tips)
