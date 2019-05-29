@@ -2,5 +2,7 @@ export(clmp)
 export(print.clmp)
 export(summary.clmp)
 export(plot.clmp)
+export(midpoint)
 
-useDynLib(clmp)
+useDynLib(clmp, .registration = TRUE)
+importFrom(Rcpp, sourceCpp)
