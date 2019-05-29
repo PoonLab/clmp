@@ -3,9 +3,9 @@
 # t4 <- read.tree(text="(((A:0.1,B:0.2):0.3,C:0.2):0.1,D:0.3):0;")
 # t5 <- read.tree(text="(((A:0.4,B:0.2):0.15,C:0.25):0.05,D:0.3):0;")
 
-midpoint <- function(tree, node.labels = "support", ...)
+midpoint <- function(tree, node.labels = "support", ...) {
   UseMethod("midpoint")
-
+}
 
 
 midpoint.phylo <- function(tree, node.labels = "support", ...){

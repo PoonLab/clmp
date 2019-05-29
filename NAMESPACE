@@ -3,5 +3,6 @@ export(print.clmp)
 export(summary.clmp)
 export(plot.clmp)
 export(as.phylo.clmp)
+export(midpoint)
 
 useDynLib(clmp)
