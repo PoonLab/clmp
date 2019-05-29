@@ -2,13 +2,10 @@ export(clmp)
 export(print.clmp)
 export(summary.clmp)
 export(plot.clmp)
-<<<<<<< HEAD
-export(midpoint)
-=======
+
 export(as.phylo.clmp)
 export(midpoint)
 export(midpoint.phylo)
->>>>>>> 6a7504e82e3863d3865e50877fce358735aef3f9
 
 useDynLib(clmp, .registration = TRUE)
 importFrom(Rcpp, sourceCpp)
