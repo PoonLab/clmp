@@ -10,7 +10,7 @@ is.tip <- function(tr) {
   tr$edge[,2] <= Ntip(tr)
 }
 
-clockify <- function(tree, seq.len) {
+clockify <- function(tree, seq.len, sample=FALSE) {
   # Gamma-Poisson smoothing of branch lengths
   # @param tree:  object of class "phylo" (ape package)
   # @param seq.len:  length of alignment from which tree 
@@ -28,8 +28,14 @@ clockify <- function(tree, seq.len) {
     mu <- fit$est[2]
     beta <- size/mu  # 1/theta
     
-    tree$edge.length[index] <- (ens[index]/(1+beta) + 
-                                  (size-1)/(1+beta)) / seq.len
+    if (sample) {
+      
+    } else {
+      # assign MLE
+      tree$edge.length[index] <- (tree$edge.length[index]*seq.len/(1+beta) + 
+                                    (size-1)/(1+beta)) / seq.len  
+    }
+    
   }
   
   tree  
