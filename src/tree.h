@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <gsl/gsl_rng.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #define NTIP(t) ( (igraph_vcount(t) + 1) / 2 )
 

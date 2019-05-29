@@ -6,7 +6,7 @@
 #define UTIL_H
 
 #include <gsl/gsl_rng.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 /** Set seeds for all random number generators.
  *

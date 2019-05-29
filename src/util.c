@@ -4,7 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <gsl/gsl_rng.h>
-#include <igraph.h>
+#include <igraph/igraph.h>
 
 #include "util.h"
 
@@ -79,9 +79,14 @@ void rotl(void *x, size_t nx, size_t n)
 
 int get_scale(double *x, int n)
 {
+    // Likelihood scaling to avoid numerical underflow
+    // x: vector of likelihoods as doubles
+    // n: length of vector
+    // returns: average of largest log-likelihoods - if n=1 then returns 0
     int i, nkeep = 0;
     double ilog, logsum = 0, logmax = LOG_ZERO;
 
+    // get maximum log-likelihood value
     for (i = 0; i < n; ++i)
         logmax = fmax(x[i] == 0 ? LOG_ZERO : log10(x[i]), logmax);
 
@@ -92,10 +97,11 @@ int get_scale(double *x, int n)
                 logsum += ilog;
                 nkeep += 1;
             }
+            // else value is numerically zero
         }
     }
     if (nkeep == 0)
-        return 0;
+        return 0;  // no scaling possible
     return (int) ceil(logsum / nkeep);
 }
 
