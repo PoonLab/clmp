@@ -1,3 +1,183 @@
+# port of phangorn::bip phylo related function
+# file found at https://github.com/KlausVigo/phangorn/blob/master/R/phylo.R
+
+bip <- function(x) {
+  x <- reorder(x, "postorder")
+  nTips <- as.integer(length(x$tip.label))
+  .Call("_clmp_bipCPP", PACKAGE = "clmp", x$edge, nTips)
+}
+
+
+
+# port of phangorn::oneWise phylo related function
+# file found at https://github.com/KlausVigo/phangorn/blob/master/R.treedist.R
+
+oneWise <- function(x, nTips = NULL) {
+  if (is.null(nTips)) nTips <- length(x[[1L]])
+  v <- 1:nTips
+  for (i in seq_along(x)) {
+    y <- x[[i]]
+    if (y[1] != 1)
+      y <- v[-y]
+    if (y[1] != 1)
+      y <- v[-y]
+    x[[i]] <- y
+  }
+  x
+}
+
+
+
+# port of phangorn::splits and phangorgn::changeOrder phylo related function
+# file found at https://github.com/KlausVigo/phangorn/blob/master/R/splits.R
+
+as.splits <- function(x, ...) {
+  if (inherits(x, "splits")) return(x)
+  UseMethod("as.splits")
+}
+
+as.splits.phylo <- function(x, ...) {
+  if (hasArg(as.is))
+    as.is <- list(...)$as.is
+  else as.is <- TRUE
+  result <- bip(x)
+  if (!is.null(x$edge.length)) {
+    edge.weights <- numeric(max(x$edge))
+    edge.weights[x$edge[, 2]] <- x$edge.length
+    attr(result, "weights") <- edge.weights
+  }
+  if (!is.null(x$node.label)) {
+    conf <- x$node.label
+    if (is.character(conf)) conf <- as.numeric(conf)
+    if (!as.is) if (max(na.omit(conf)) > (1 + 1e-8)) conf <- conf / 100
+    attr(result, "confidences") <- c(rep(NA_real_, length(x$tip.label)), conf)
+  }
+  attr(result, "labels") <- x$tip.label
+  class(result) <- c("splits", "prop.part")
+  result
+}
+
+
+
+changeOrder <- function(x, labels) {
+  oldL <- attr(x, "labels")
+  ind <- match(oldL, labels)
+  for (i in seq_along(x))
+    x[[i]] <- sort(ind[x[[i]]])
+  if (!is.null(attr(x, "cycle")))
+    attr(x, "cycle") <- ind[attr(x, "cycle")]
+  attr(x, "labels") <- labels
+  x
+}
+
+
+
+
+# port of phangorn::networx phylo related function
+# file found at https://github.com/KlausVigo/phangorn/blob/master/R/networx.R
+
+addConfidences <- function(x, y, ...) UseMethod("addConfidences")
+
+addConfidencesMultiPhylo <- function(spl, trees) {
+  fun <- function(spl, intersect_labels) {
+    spl2 <- spl
+    index <- match(attr(spl, "labels"), intersect_labels)
+    attr(spl2, "labels") <- intersect_labels
+    for (i in seq_along(spl2)) {
+      spl2[[i]] <- sort(na.omit(index[spl[[i]]]))
+    }
+    l_spl <- lengths(spl2)
+    l <- length(intersect_labels)
+    ind <- which((l_spl > 1) & (l_spl < (l - 1L)))
+    if (length(ind) == 0) return(NULL)
+    list(spl = spl2[ind], index = ind)
+  }
+  
+  spl_labels <- attr(spl, "labels")
+  zaehler <- numeric(length(spl))
+  nenner <- numeric(length(spl))
+  for (i in seq_along(trees)) {
+    intersect_labels <- intersect(trees[[i]]$tip.label, spl_labels)
+    if (length(intersect_labels) > 3) {
+      tmp <- fun(spl, intersect_labels)
+      if (!is.null(tmp)) {
+        tree_spl <- as.splits(trees[[i]])
+        if (!identical(intersect_labels, trees[[i]]$tip.label))
+          tree_spl <- fun(tree_spl, intersect_labels)[[1]]
+        comp <- compatible_2(as.bitsplits(tmp[[1]]), as.bitsplits(tree_spl))
+        ind <- tmp$index
+        zaehler[ind] <- zaehler[ind] + comp
+        nenner[ind] <- nenner[ind] + 1L
+      }
+    }
+  }
+  confidences <- zaehler / nenner
+  attr(spl, "confidences") <- confidences
+  spl
+}
+
+
+
+addConfidences.splits <- function(x, y, scaler = 1, ...) {
+  if (hasArg(add))
+    add <- list(...)$add
+  else add <- FALSE
+  
+  tiplabel <- attr(x, "label")
+  nTips <- length(tiplabel)
+  #    x = addTrivialSplits(x)
+  if (inherits(y, "phylo")) {
+    ind <- match(tiplabel, y$tip.label)
+    if (any(is.na(ind)) | length(tiplabel) != length(y$tip.label))
+      stop("trees have different labels")
+    y$tip.label <- y$tip.label[ind]
+    ind2 <- match(seq_along(ind), y$edge[, 2])
+    y$edge[ind2, 2] <- order(ind)
+  }
+  if (inherits(y, "multiPhylo")) {
+    if (inherits(try(.compressTipLabel(y), TRUE), "try-error")) {
+      res <- addConfidencesMultiPhylo(x, y)
+      return(res)
+    }
+  }
+  
+  spl <- as.splits(y)
+  spl <- changeOrder(spl, tiplabel)
+  spl <- oneWise(spl, nTips)
+  ind <- match(oneWise(x, nTips), spl)
+  #    pos <-  which(ind > nTips)
+  pos <-  which(!is.na(ind))
+  confidences <- rep(NA_real_, length(x)) # numeric(length(x))  #character
+  confidences[pos] <- attr(spl, "confidences")[ind[pos]] * scaler
+  if (add == TRUE) confidences <- paste(prettyNum(attr(x, "confidences")),
+                                        prettyNum(confidences * scaler), sep = "/")
+  #        y$node.label[ind[pos] - nTips]
+  attr(x, "confidences") <- confidences
+  x
+}
+
+
+
+addConfidences.phylo <- function(x, y, ...) {
+  #    call <- x$call
+  if (hasArg(as.is))
+    as.is <- list(...)$as.is
+  else as.is <- TRUE
+  nTips <- length(x$tip.label)
+  spl <- as.splits(x) %>% oneWise(nTips = nTips)
+  conf <- attr(addConfidences(spl, y), "confidences")
+  l <- lengths(spl)
+  if (is.character(conf)) conf <- as.numeric(conf)
+  ind <- (l == 1L) | (l == (nTips - 1L)) | (l == nTips)
+  conf[ind == TRUE] <- NA_real_
+  nTips <- length(x$tip.label)
+  if (!as.is) conf <- conf * 100
+  x$node.label <- conf[-c(1:nTips)]
+  x
+}
+
+
+
 # port of phangorn::midpoint function and related helper functions
 # file found at  https://github.com/KlausVigo/phangorn/blob/master/R/treeManipulation.R
 # t4 <- read.tree(text="(((A:0.1,B:0.2):0.3,C:0.2):0.1,D:0.3):0;")
@@ -39,8 +219,7 @@ midpoint.phylo <- function(tree, node.labels = "support", ...){
     edge[left,2] <- rn 
     el[left] <- el[left] - (maxdm/2)
     el <- c(el, maxdm/2) 
-  }
-  else{
+  }else{
     sel <- cumsum(el[right]) 
     i <- which(sel>(maxdm/2))[1]
     edge <- rbind(edge, c(rn, tmp[i]))       
