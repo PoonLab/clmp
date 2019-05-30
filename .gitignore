@@ -16,4 +16,7 @@ tests/Makefile
 
 *.o
 *.lo
+configure
+src/Makevars
+src/clmp.so
 

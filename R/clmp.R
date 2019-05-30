@@ -1,5 +1,6 @@
 
-clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), scale='none', trace=FALSE) {
+clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), 
+                 scale='none', trace=FALSE, min.bl=0.2) {
   # Make sure that the tree argument is an ape phylo object
   if (class(tree) != 'phylo') {
     if (class(tree) == 'character') {
