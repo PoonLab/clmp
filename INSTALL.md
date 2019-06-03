@@ -7,10 +7,13 @@
   * [ape](http://ape-package.ird.fr/)
   * [Rcpp](https://cran.r-project.org/web/packages/Rcpp/index.html)
   * [ggtree](https://bioconductor.org/packages/release/bioc/html/ggtree.html)
+* GNU tools
+  * [autoconf]()
+  * [flex](https://github.com/westes/flex)
 * C libraries:
   * [GNU Scientific Library](https://www.gnu.org/software/gsl/)
   * [C-igraph](http://igraph.org/c/)
-  * [flex](https://github.com/westes/flex)
+
 
 
 ## Installing on Ubuntu
@@ -56,10 +59,11 @@ These instructions have been tested on Ubuntu versions 16.04 and 18.04.
     
 4. Install the required GNU tools and C libraries
     ```console
-    $ sudo apt-get install libgsl-dev
-    $ sudo apt-get install libigraph0v5
-    $ sudo apt-get install libigraph0-dev
-    $ sudo apt-get install flex
+    $ sudo apt install libgsl-dev
+    $ sudo apt install libigraph0v5
+    $ sudo apt install libigraph0-dev
+    $ sudo apt install flex
+    $ sudo apt install autoconf
     ```
 
 5. Download the clmp R package from GitHub:
@@ -75,6 +79,8 @@ These instructions have been tested on Ubuntu versions 16.04 and 18.04.
    
 6. Build and install the R package
    ```console
+   $ autoconf
+   $ ./configure
    $ R CMD INSTALL .
    * installing to library ‘/home/art/R/x86_64-pc-linux-gnu-library/3.6’
    * installing *source* package ‘clmp’ ...
