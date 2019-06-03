@@ -102,12 +102,13 @@ These instructions have been tested on Ubuntu versions 16.04 and 18.04.
    * DONE (clmp)
    ```
 
-## Requirements Installation Procedure (Mac):
+## Installation on macOS
 
-* The commands for each step are to be written/copied line by line to the terminal.
+It is generally easier to install third-party packages and libraries using a package manager like [MacPorts](https://www.macports.org/) and [Homebrew](https://brew.sh/).  We prefer using Homebrew, so these instructions are written assuming that you are using this package manager, although similar results should be obtainable with MacPorts.
 
-1. Install the latest version of R from the appropriate [mirror](https://cran.r-project.org/mirrors.html).
-2. Installing Xcode
+1. If your system does not already have R, download and install the latest version of R from the appropriate CRAN [mirror site](https://cran.r-project.org/mirrors.html).
+
+2. If Xcode is not already installed on your system, open the Terminal application and enter the following:
     ```
     xcode-select --install
     ```
@@ -115,12 +116,12 @@ These instructions have been tested on Ubuntu versions 16.04 and 18.04.
     ```
     xcodebuild -version
     ```
-3. Installing Command Line Tools
-
-   Go to http://developer.apple.com/downloads and sign in with your Apple ID (the same one you use for iTunes and app
+    
+3. Installing the Command Line Tools.  Go to http://developer.apple.com/downloads and sign in with your Apple ID (the same one you use for iTunes and app
    purchases). Search for "command line tools" (in the search field on the left), then click on version corresponding to the
    installed version of Xcode and click on the the .dmg link to download it. Run the .dmg and follow the generated prompts
    to the end of installation.
+   
 4. Installing Homebrew
     ```
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
