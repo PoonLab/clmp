@@ -1,8 +1,11 @@
-## Installation Requirements (Ubuntu and Mac):
+
+
+## Requirements:
 
 * [R software environment](https://cran.r-project.org/)
 * R packages
   * [ape](http://ape-package.ird.fr/)
+  * [Rcpp](https://cran.r-project.org/web/packages/Rcpp/index.html)
   * [ggtree](https://bioconductor.org/packages/release/bioc/html/ggtree.html)
 * C libraries:
   * [GNU Scientific Library](https://www.gnu.org/software/gsl/)
@@ -10,35 +13,87 @@
   * [flex](https://github.com/westes/flex)
 
 
-## Requirements Installation Procedure (Ubuntu):
+## Installing on Ubuntu
 
-* The commands for each step are to be written/copied line by line to the terminal.
+These instructions have been tested on Ubuntu versions 16.04 and 18.04.
 
-1. Updating and Upgrading The System
-    ```
+1. Update and upgrade your system (optional):
+    ```console
     sudo apt-get update
     sudo apt-get upgrade
     ```
-2. Installing R
+    
+2. If you do not already have R on your system, install it using the package manager:
     ```
     sudo apt-get install r-base
     sudo apt-get install r-base-dev
     ```
-3. Installing R Packages
+    
+3. Install the required R packages:
+    ```console
+    art@orolo:~$ R
     ```
-    R
-    install.packages("ape")
-    source("https://bioconductor.org/biocLite.R")
-    biocLite("ggtree")
-    quit() 
+    
+    ```R
+    > install.packages("ape")
+    > install.packages("Rcpp")
     ```
-4. Installing GNU tools and C libraries
+    
+    If you are running R 3.6+, use the following commands to install Bioconductor and ggtree:
+    ```R
     ```
-    sudo apt-get install libgsl-dev
-    sudo apt-get install libigraph0v5
-    sudo apt-get install libigraph0-dev
-    sudo apt-get install flex
+    If you are running an older version of R, use the following commands:
+    ```R
+    > source("https://bioconductor.org/biocLite.R")
+    > biocLite("ggtree")
     ```
+    Finally, exit R to return to the command line:
+    ```R
+    > quit()
+    Save workspace image? [y/n/c]: n
+    ```
+    
+4. Install the required GNU tools and C libraries
+    ```console
+    $ sudo apt-get install libgsl-dev
+    $ sudo apt-get install libigraph0v5
+    $ sudo apt-get install libigraph0-dev
+    $ sudo apt-get install flex
+    ```
+
+5. Download the clmp R package from GitHub:
+   ```
+   $ git clone https://github.com/PoonLab/clmp
+   ```
+   If you do not have git installed or would prefer to not clone the repository, you can download a ZIP archive of the package:
+   ```
+   $ wget https://github.com/PoonLab/clmp/archive/master.zip
+   $ unzip master.zip
+   $ cd clmp-master
+   ```
+   
+6. Build and install the R package
+   ```console
+   $ R CMD INSTALL .
+   * installing to library ‘/home/art/R/x86_64-pc-linux-gnu-library/3.6’
+   * installing *source* package ‘clmp’ ...
+   ** using staged installation
+   configure: creating ./config.status
+   config.status: creating src/Makevars
+   ** libs
+   make: Nothing to be done for 'all'.
+   installing to /home/art/R/x86_64-pc-linux-gnu-library/3.6/00LOCK-clmp/00new/clmp/libs
+   ** R
+   ** byte-compile and prepare package for lazy loading
+   ** help
+   *** installing help indices
+   ** building package indices
+   ** testing if installed package can be loaded from temporary location
+   ** checking absolute paths in shared objects and dynamic libraries
+   ** testing if installed package can be loaded from final location
+   ** testing if installed package keeps a record of temporary installation path
+   * DONE (clmp)
+   ```
 
 ## Requirements Installation Procedure (Mac):
 
