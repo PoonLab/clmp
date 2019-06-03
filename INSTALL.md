@@ -19,28 +19,29 @@ These instructions have been tested on Ubuntu versions 16.04 and 18.04.
 
 1. Update and upgrade your system (optional):
     ```console
-    sudo apt-get update
-    sudo apt-get upgrade
+    $ sudo apt-get update
+    $ sudo apt-get upgrade
     ```
     
 2. If you do not already have R on your system, install it using the package manager:
     ```
-    sudo apt-get install r-base
-    sudo apt-get install r-base-dev
+    $ sudo apt-get install r-base
+    $ sudo apt-get install r-base-dev
     ```
     
 3. Install the required R packages:
     ```console
-    art@orolo:~$ R
-    ```
-    
-    ```R
+    $ R
     > install.packages("ape")
     > install.packages("Rcpp")
     ```
     
     If you are running R 3.6+, use the following commands to install Bioconductor and ggtree:
     ```R
+    > if (!requireNamespace("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+    > BiocManager::install()
+    > BiocManager::install("ggtree")
     ```
     If you are running an older version of R, use the following commands:
     ```R
