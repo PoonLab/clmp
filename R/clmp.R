@@ -1,6 +1,6 @@
 
 clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), 
-                 scale='none', trace=FALSE, min.bl=0.2) {
+                 scale='none', trace=FALSE, nsites=NA, min.bl=0.2) {
   # Make sure that the tree argument is an ape phylo object
   if (class(tree) != 'phylo') {
     if (class(tree) == 'character') {
@@ -28,6 +28,14 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
     tree2$node.label <- paste0("Node", 1:Nnode(tree2))
   }
 
+  # check for near-zero branch lengths
+  if (!is.na(nsites) & is.numeric(nsites)) {
+    bl <- tree2$edge.length * nsites
+    if (any(bl <= min.bl)) {
+      tree2$edge.length[bl<=min.bl] <- min.bl/nsites
+    }
+  }
+  
   # rescale branch lengths if requested by user
   scale.factor <- 1.
   if (scale == 'mean') {
@@ -46,6 +54,7 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   # TODO: annotate tree with rate class assignments
   index <- match(c(tree2$tip.label, tree2$node.label), names(res))
   tree2$clusters <- res[index]
+  
   class(tree2) <- c('clmp', class(tree2))
   tree2
 }
