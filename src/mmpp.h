@@ -28,9 +28,9 @@ typedef struct mmpp_workspace mmpp_workspace;
  * \param[in] bounds lower bound for branching rates, upper bound for branching 
  *                   rates, lower bound for transition rates, upper bound for 
  *                   transition rates
- * \return 0 if the fit was successful, 1 otherwise
+ * \return log-likelihood (double)
  */
-int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
+double fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
         const char *cmaes_settings, int *states, model_selector sel,
         int use_tips, double bounds[4]);
 

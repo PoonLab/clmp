@@ -60,6 +60,7 @@ igraph_t * R_clmp_parse_newick(SEXP newick) {
 void display_results(int nrates, double *theta, double branch_scale)
 {
     // from Rosemary's pcbr.c (github.com/rmcclosk/netabc)
+    // DEPRECATED
     int i, j;
     int *rate_order = malloc(nrates * sizeof(int));
 
@@ -96,15 +97,23 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
      @arg nwk:  <input> Newick tree string
      @arg nrates:  <input>  number of rate classes
      */
-    SEXP result;
-    SEXP names;
+    SEXP result, 
+         cindex, 
+         names, 
+         loglik,
+         mle_rates,
+         mle_trans;
 
     int nrates = (int) REAL(nrates_arg)[0];
     int trace = (int) REAL(trace_arg)[0];
+    
     double *theta = malloc(nrates * nrates * sizeof(double));
-    int i, j, error, *states, *clusters;
+    int *rate_order = malloc(nrates * sizeof(int));
+    
+    int i, j, *states, *clusters;
     int nnodes;
 
+    
     //TODO: implement bounds
     SEXP bounds = PROTECT(allocVector(REALSXP, 4));
     for (i=0; i<4; i++) {
@@ -117,33 +126,59 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
     igraph_t * tree = R_clmp_parse_newick(nwk);
     nnodes = igraph_vcount(tree);
 
-    // allocate return matrix
-    result = PROTECT(allocVector(REALSXP, nnodes));
+    // allocate vectors
+    cindex = PROTECT(allocVector(INTSXP, nnodes));
     names = PROTECT(allocVector(STRSXP, nnodes));
+    loglik = PROTECT(allocVector(REALSXP, 1));
+    mle_rates = PROTECT(allocVector(REALSXP, nrates));
+    mle_trans = PROTECT(allocVector(REALSXP, nrates*nrates));
+    
+    result = PROTECT(allocVector(VECSXP, 4));
 
     // allocate vectors given number of nodes in tree
     states = malloc(igraph_vcount(tree) * sizeof(int));
     clusters = malloc(igraph_vcount(tree) * sizeof(int));
 
     // run MMPP analysis
-    error = fit_mmpp(tree, &nrates, &theta, trace, NULL,
-            states, LRT, 0, REAL(bounds));
+    REAL(loglik)[0] = fit_mmpp(tree, &nrates, &theta, trace, NULL, 
+         states, LRT, 0, REAL(bounds));
 
-
-    display_results(nrates, theta, 1.);
+    
+    //display_results(nrates, theta, 1.);
+    order(theta, rate_order, sizeof(double), nrates, compare_doubles);
+    for (i = 0; i < nrates; ++i) {
+        REAL(mle_rates)[i] = theta[rate_order[i]];
+        
+        for (j = 0; j < nrates; ++j) {
+            if (i==j) {
+                REAL(mle_trans)[i*nrates + j] = -1;  // placeholder
+            }
+            else if (i > j) {
+                REAL(mle_trans)[i*nrates + j] = theta[nrates + rate_order[i]*(nrates-1) + rate_order[j]];
+            }
+            else {
+                REAL(mle_trans)[i*nrates + j] = theta[nrates + rate_order[i]*(nrates-1) + rate_order[j] - 1];
+            }
+        }
+    }
+    
 
     get_clusters(tree, states, clusters, 1);
-
     for (i = 0; i < nnodes; ++i) {
-        REAL(result)[i] = clusters[i];
+        INTEGER(cindex)[i] = clusters[i];
         SET_STRING_ELT(names, i, mkChar(VAS(tree, "id", i)));
     }
-    setAttrib(result, R_NamesSymbol, names);
+    setAttrib(cindex, R_NamesSymbol, names);
+    
+    SET_VECTOR_ELT(result, 0, cindex);
+    SET_VECTOR_ELT(result, 1, loglik);
+    SET_VECTOR_ELT(result, 2, mle_rates);
+    SET_VECTOR_ELT(result, 3, mle_trans);
 
     // free up memory
     igraph_destroy(tree);
 
-    UNPROTECT(2);
+    UNPROTECT(6);
 
     return(result);
 }
