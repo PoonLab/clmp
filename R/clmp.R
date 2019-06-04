@@ -1,6 +1,15 @@
 
 clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), 
                  scale='none', trace=FALSE, nsites=NA, min.bl=0.2) {
+  # @param tree:  object of class "phylo" (ape package)
+  # @param nrates:  number of lineage birth rate classes
+  # @param bounds:  vector of length 4, for lower and upper bounds of 
+  #                 birth and transition rates, respectively.
+  # @param scale:  option to rescale branch lengths of tree
+  # @param trace:  option to display verbose log of model optimization
+  # @param min.bl:  minimum branch length in expected number of 
+  #                 substitutions over all sites (full alignment length)
+  
   # Make sure that the tree argument is an ape phylo object
   if (class(tree) != 'phylo') {
     if (class(tree) == 'character') {
@@ -50,10 +59,15 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   nwk <- write.tree(tree2)
 
   res <- .Call("R_clmp", nwk, nrates, bounds, as.double(trace), PACKAGE='clmp')
-
-  # TODO: annotate tree with rate class assignments
-  index <- match(c(tree2$tip.label, tree2$node.label), names(res))
-  tree2$clusters <- res[index]
+  
+  # unpack outputs
+  index <- match(c(tree2$tip.label, tree2$node.label), names(res[[1]]))
+  tree2$clusters <- res[[1]][index]
+  tree2$loglik <- res[[2]][1]
+  tree2$rates <- res[[3]]
+  tree2$tr.rates <- matrix(res[[4]], nrow=nrates, ncol=nrates, byrow=T)
+  # rows sum to 0
+  diag(tree2$tr.rates) <- -1 * apply(tree2$tr.rates, 1, sum)
   
   class(tree2) <- c('clmp', class(tree2))
   tree2

@@ -53,7 +53,7 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
              const char *cmaes_settings, int *states, double *loglik,
              int use_tips, double bounds[4]);
 
-int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
+double fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
              const char *cmaes_settings, int *states, model_selector sel,
              int use_tips, double bounds[4])
 {
@@ -66,7 +66,7 @@ int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
         error = _fit_mmpp(tree, *nrates, *theta, trace, cmaes_settings, states,
                           &loglik, use_tips, bounds);
         fprintf(stderr, "log likelihood for %d state model is %f\n", *nrates, loglik);
-        return error;
+        return loglik;  //error;
     }
 
     error = _fit_mmpp(tree, 1, prev_theta, trace, cmaes_settings, states,
@@ -114,7 +114,7 @@ int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
 
     memcpy(*theta, prev_theta, *nrates * *nrates * sizeof(double));
     free(prev_theta);
-    return error;
+    return loglik;  //error;
 }
 
 void get_clusters(const igraph_t *tree, const int *states, int *clusters,
