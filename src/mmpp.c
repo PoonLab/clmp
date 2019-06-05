@@ -53,67 +53,20 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
              const char *cmaes_settings, int *states, double *loglik,
              int use_tips, double bounds[4]);
 
+
 double fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
              const char *cmaes_settings, int *states, model_selector sel,
              int use_tips, double bounds[4])
 {
-    int i, accept, error = 0;
-    double loglik, prev_loglik, test_stat;
-    double *prev_theta = malloc(MAX_NRATES * MAX_NRATES * sizeof(double));
+    int error = 0;
+    double loglik;
 
-    if (*nrates > 0)
-    {
-        error = _fit_mmpp(tree, *nrates, *theta, trace, cmaes_settings, states,
-                          &loglik, use_tips, bounds);
-        fprintf(stderr, "log likelihood for %d state model is %f\n", *nrates, loglik);
-        return loglik;  //error;
+    error = _fit_mmpp(tree, *nrates, *theta, trace, cmaes_settings, states,
+                      &loglik, use_tips, bounds);
+    if (error) {
+      fprintf(stderr, "Warning in fit_mmpp: parameter estimates did not converge\n");
     }
-
-    error = _fit_mmpp(tree, 1, prev_theta, trace, cmaes_settings, states,
-                      &prev_loglik, use_tips, bounds);
-    fprintf(stderr, "log likelihood for 1 state model is %f\n", prev_loglik);
-    *nrates = 1;
-
-    for (i = 2; i <= MAX_NRATES && !error; ++i)
-    {
-        *theta = safe_realloc(*theta, i * i * sizeof(double));
-
-        // if we failed to fit a model with more states, fall back to the previous one
-        if (_fit_mmpp(tree, i, *theta, trace, cmaes_settings, states, &loglik,
-                      use_tips, bounds)) {
-            fprintf(stderr, "Warning: parameter estimates for %d state model did not converge\n", i);
-        }
-        fprintf(stderr, "log likelihood for %d state model is %f\n", i, loglik);
-        
-        if (sel == LRT) {
-            test_stat = lrt(prev_loglik, loglik, (i-1)*(i-1), i*i);
-            fprintf(stderr, "P-value for %d state model is %f\n", i, test_stat);
-            accept = test_stat < 0.05;
-        }
-        else if (sel == AIC) {
-            test_stat = aic(loglik, i*i) - aic(prev_loglik, (i-1)*(i-1));
-            fprintf(stderr, "delta AIC for %d state model is %f\n", i, test_stat);
-            accept = test_stat <= -2;
-        }
-        else if (sel == BIC) {
-            test_stat = bic(loglik, i*i, igraph_ecount(tree)) - bic(prev_loglik, (i-1)*(i-1), igraph_ecount(tree));
-            fprintf(stderr, "delta BIC for %d state model is = %f\n", i, test_stat);
-            accept = test_stat <= -2;
-        }
-
-        if (!accept)
-        {
-            fprintf(stderr, "%d state model is not supported\n", i);
-            break;
-        }
-
-        memcpy(prev_theta, *theta, i * i * sizeof(double));
-        prev_loglik = loglik;
-        *nrates = i;
-    }
-
-    memcpy(*theta, prev_theta, *nrates * *nrates * sizeof(double));
-    free(prev_theta);
+    //fprintf(stderr, "log likelihood for %d state model is %f\n", *nrates, loglik);
     return loglik;  //error;
 }
 
@@ -394,10 +347,11 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
 
     funvals = cmaes_init(&evo, dimension, theta, init_sd, 0, CMAES_POP_SIZE, cmaes_settings);
 
-	while (!cmaes_TestForTermination(&evo)) {
-
-		pop = cmaes_SamplePopulation(&evo);
-		for (i = 0; i < CMAES_POP_SIZE; ++i) {
+  	while (!cmaes_TestForTermination(&evo)) {
+        // generate search points
+	    	pop = cmaes_SamplePopulation(&evo);
+  	    
+	    	for (i = 0; i < CMAES_POP_SIZE; ++i) {
             cmaes_boundary_transformation(&trbound, pop[i], theta, dimension);
             for (j = 0; j < dimension; ++j)
             {
@@ -406,12 +360,15 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
                     fprintf(stderr, "%f\t", theta[j]);
             }
             funvals[i] = -likelihood(tree, nrates, theta, w, use_tips, 0);
-            if (funvals[i] != funvals[i])
+            
+            if (funvals[i] != funvals[i])  // detect numeric overflow?
                 funvals[i] = FLT_MAX;
             if (trace)
                 fprintf(stderr, "%f\n", -funvals[i]);
         }
-		cmaes_UpdateDistribution(&evo, funvals);
+	    	
+	    	// update search distribution
+	    	cmaes_UpdateDistribution(&evo, funvals);
     }
 
     if (strncmp(cmaes_TestForTermination(&evo), "TolFun", 6) != 0)

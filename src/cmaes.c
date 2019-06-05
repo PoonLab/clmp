@@ -2655,6 +2655,7 @@ cmaes_readpara_ReadFromFile(cmaes_readpara_t *t, const char * filename)
 {
   char s[1000];
   const char *ss = "cmaes_initials.par";
+  
   int ipara, i;
   int size;
   FILE *fp;

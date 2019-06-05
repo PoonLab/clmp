@@ -10,7 +10,8 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   # @param min.bl:  minimum branch length in expected number of 
   #                 substitutions over all sites (full alignment length)
   
-  # Make sure that the tree argument is an ape phylo object
+  
+  # make sure <tree> is an object of class "phylo"
   if (class(tree) != 'phylo') {
     if (class(tree) == 'character') {
       # make sure string is standard Newick format
@@ -22,6 +23,11 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
       }
     }
   }
+  
+  # input validation
+  stopifnot(is.numeric(nrates), nrates>0)
+  stopifnot(is.numeric(bounds), length(bounds)==4, all(bounds>=0))
+  stopifnot(is.numeric(min.bl), min.bl>=0)
 
   # pre-process tree
   tree2 <- multi2di(tree)  # resolve polytomies
