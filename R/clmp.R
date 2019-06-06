@@ -1,11 +1,10 @@
 
 clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), 
-                 scale='none', trace=FALSE, nsites=NA, min.bl=0.2) {
+                 trace=FALSE, nsites=NA, min.bl=0.2) {
   # @param tree:  object of class "phylo" (ape package)
   # @param nrates:  number of lineage birth rate classes
   # @param bounds:  vector of length 4, for lower and upper bounds of 
   #                 birth and transition rates, respectively.
-  # @param scale:  option to rescale branch lengths of tree
   # @param trace:  option to display verbose log of model optimization
   # @param min.bl:  minimum branch length in expected number of 
   #                 substitutions over all sites (full alignment length)
@@ -46,20 +45,9 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   # check for near-zero branch lengths
   if (!is.na(nsites) & is.numeric(nsites)) {
     bl <- tree2$edge.length * nsites
-    if (any(bl <= min.bl)) {
-      tree2$edge.length[bl<=min.bl] <- min.bl/nsites
-    }
+    # substitute new minimum length for any branches below cutoff
+    tree2$edge.length[bl<=min.bl] <- min.bl/nsites
   }
-  
-  # rescale branch lengths if requested by user
-  scale.factor <- 1.
-  if (scale == 'mean') {
-    scale.factor <- mean(tree2$edge.length)
-  }
-  if (scale == 'median') {
-    scale.factor <- median(tree2$edge.length)
-  }
-  tree2$edge.length <- tree2$edge.length / scale.factor
 
   # serialize tree (defaults to stdout)
   nwk <- write.tree(tree2)
@@ -72,12 +60,19 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   tree2$loglik <- res[[2]][1]
   tree2$rates <- res[[3]]
   tree2$tr.rates <- matrix(res[[4]], nrow=nrates, ncol=nrates, byrow=T)
-  # rows sum to 0
+  tree2$states <- res[[5]][index]
+  
+  # make rows of transition rate matrix sum to 0
   diag(tree2$tr.rates) <- -1 * apply(tree2$tr.rates, 1, sum)
+  
+  # for compatibility with generic AIC
+  tree2$nobs <- tree2$Nnode
+  tree2$df <- nrates*nrates
   
   class(tree2) <- c('clmp', class(tree2))
   tree2
 }
+
 
 print.clmp <- function(obj, printlen=6, ...) {
   print.phylo(obj, printlen=printlen, ...)
@@ -99,7 +94,7 @@ summary.clmp <- function(obj, ...) {
     cat("  Cluster assignments:\n")
     print(table(obj$clusters))
   }
-  # TODO: summarize rate class estimates
+  
 }
 
 plot.clmp <- function(obj, ...) {
@@ -115,3 +110,12 @@ plot.clmp <- function(obj, ...) {
 as.phylo.clmp <- function(obj, ...) {
   obj  # override as.phylo() which rejects derived class objects
 }
+
+logLik.clmp <- function(obj, ...) {
+  ll <- obj$loglik
+  attr(ll, 'df') <- obj$df
+  ll
+}
+
+
+

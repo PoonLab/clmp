@@ -96,13 +96,12 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
      Implement MMPP method
      @arg nwk:  <input> Newick tree string
      @arg nrates:  <input>  number of rate classes
+     @arg bounds_arg:  <input>  vector of length 4, min-max values for 
+                       rates and transition rates
+     @arg trace_arg:  <input> integer, write verbose output to stderr
+                      if >0.  Also used to set the log interval.
      */
-    SEXP result, 
-         cindex, 
-         names, 
-         loglik,
-         mle_rates,
-         mle_trans;
+    SEXP result, cindex, sindex, names, loglik, mle_rates, mle_trans;
 
     int nrates = (int) REAL(nrates_arg)[0];
     int trace = (int) REAL(trace_arg)[0];
@@ -132,8 +131,9 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
     loglik = PROTECT(allocVector(REALSXP, 1));
     mle_rates = PROTECT(allocVector(REALSXP, nrates));
     mle_trans = PROTECT(allocVector(REALSXP, nrates*nrates));
+    sindex = PROTECT(allocVector(INTSXP, nnodes));
     
-    result = PROTECT(allocVector(VECSXP, 4));
+    result = PROTECT(allocVector(VECSXP, 5));
 
     // allocate vectors given number of nodes in tree
     states = malloc(igraph_vcount(tree) * sizeof(int));
@@ -166,19 +166,22 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
     get_clusters(tree, states, clusters, 1);
     for (i = 0; i < nnodes; ++i) {
         INTEGER(cindex)[i] = clusters[i];
+        INTEGER(sindex)[i] = states[i];
         SET_STRING_ELT(names, i, mkChar(VAS(tree, "id", i)));
     }
     setAttrib(cindex, R_NamesSymbol, names);
+    setAttrib(sindex, R_NamesSymbol, names);
     
     SET_VECTOR_ELT(result, 0, cindex);
     SET_VECTOR_ELT(result, 1, loglik);
     SET_VECTOR_ELT(result, 2, mle_rates);
     SET_VECTOR_ELT(result, 3, mle_trans);
+    SET_VECTOR_ELT(result, 4, sindex);
 
     // free up memory
     igraph_destroy(tree);
 
-    UNPROTECT(6);
+    UNPROTECT(7);
 
     return(result);
 }
