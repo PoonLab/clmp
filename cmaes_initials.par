@@ -10,7 +10,7 @@ restarts 0                    # read by example_restarts.c, remark that restarts
 ## --- OBLIGATORY SETTINGS
 # these settings, if read, overwrite the input values to cmaes_init 
 
- N 22        # Problem dimension, overwrites parameter in cmaes_init
+ N 2           # Problem dimension, overwrites parameter in cmaes_init
  initialX 1:   # Initial search point. Syntax: 1==read one number, see also end of file. 
    0.5e0       #    these are the read value(s)!
  typicalX 1:   # Typical search point (useful for restarts, cave: boundaries), overwritten by initialX 
@@ -26,18 +26,18 @@ restarts 0                    # read by example_restarts.c, remark that restarts
 
 # stop-Parameters can be changed online via cmaes_signals.par
 
-stopMaxFunEvals   1e299     # max number of f-evaluations, 900*(N+3)*(N+3) is default
+stopMaxFunEvals   14400     # max number of f-evaluations, 900*(N+3)*(N+3) is default
 # fac*maxFunEvals   1e0     # multiplies stopMaxFunEvals by read number, default is 1
-stopMaxIter       1e299     # max number of iterations (generations), inf is default
+stopMaxIter       144     # max number of iterations (generations), inf is default
 
-# stopFitness 1e-9   # stop if function value is smaller than stopFitness
+# stopFitness        # stop if function value is smaller than stopFitness
                      # commented == never stop on function value (default)
 stopTolFun 1e-12     # stop if function value differences are 
                      # smaller than stopTolFun, default=1e-12
 stopTolFunHist 1e-13 # stop if function value differences of best values are 
                      # smaller than stopTolFunHist, default was 0
-stopTolX 1e-11   # stop if step sizes/steps in x-space are 
-                 # smaller than TolX, default=0
+stopTolX 0           # stop if step sizes/steps in x-space are 
+                     # smaller than TolX, default=0
 stopTolUpXFactor 1e3 # stop if std dev increases more than by TolUpXFactor, default 1e3
 
 seed 0            # 0 == by time, also regard maxTimeFractionForEigendecomposition
@@ -58,9 +58,9 @@ maxTimeFractionForEigendecompostion 1  # maximal CPU-time fraction for eigensyst
                      # 0.2==20% should often be faster than larger values
                      # w.r.t. the CPU-time to reach a certain function value. 
 
-# updatecov      1   # default is updating the eigensystem after 
-                     # every 1/ccov/N/10-th generation.
-# fac*updatecov  3   # multiplier for updatecov
+updatecov      0.102473   # default is updating the eigensystem after    *originally 1 
+                          # every 1/ccov/N/10-th generation.
+# fac*updatecov  3        # multiplier for updatecov
 
 # resume allcmaes.dat   # reads restart distribution from given file
 
@@ -68,17 +68,26 @@ maxTimeFractionForEigendecompostion 1  # maximal CPU-time fraction for eigensyst
 ## --- Strategy internal parameter ---
 ##     default values are set in cmaes_readpara_SupplementDefaults()
 ## -- Selection related parameters
-# lambda 100        # number of offspring == samplesize
-# mu  
-# weights      log # possible values: log (==default), 
-                   #   lin (==linearely decreasing), or equal 
+lambda 100        # number of offspring == samplesize
+mu  50            #    *originally blank
+weights      log  # possible values: log (==default), 
+                  #   lin (==linearely decreasing), or equal 
+
+cs 0.935943       #    *originally blank
+damps 7.13444     #    *originally blank
 
 ## -- Adaptation (distribution estimation) related parameters
-# diagonalCovarianceMatrix -1   # number of iterations, 1<==>always, -1<==>2+100*N/sqrt(lambda)
-# fac*damp      1  # increase or decrease damping for step size control.
-# ccumcov       1  # default is 4/(N+4), 1 means no cumulation for p_c.
-# mucov         1  # 1 means only rank 1 update of C
-# fac*ccov      1  # multiplier for default learning rate for cov. matrix
+diagonalCovarianceMatrix 0   # number of iterations, 1<==>always, -1<==>2+100*N/sqrt(lambda)
+# fac*damp      1            # increase or decrease damping for step size control.
+ccumcov         0.67         # default is 4/(N+4), 1 means no cumulation for p_c.    *originally 1
+mucov         27.2221        # 1 means only rank 1 update of C      *originally 1
+ccov 0.975871                #     *originally blank
+# fac*ccov      1            # multiplier for default learning rate for cov. matrix
+
+resume
+
+
+
 
 
 ## --- Syntax for input vectors xstart, sigma, mincoorstddev
