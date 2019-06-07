@@ -2,6 +2,7 @@ library(shiny)
 library(clmp)
 
 
+
 ui <- fluidPage(
   titlePanel("clmp: clustering with Markov-modulated Poisson processes"),
   sidebarLayout(

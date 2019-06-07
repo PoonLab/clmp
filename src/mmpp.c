@@ -16,6 +16,8 @@
 #include "util.h"
 #include "stats.h"
 
+#include <R_ext/Utils.h>
+
 #define CMAES_POP_SIZE 100
 #define MAX_NRATES 6
 
@@ -375,6 +377,9 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
             if (trace && step%trace == 0)
                 fprintf(stderr, "%f\n", -funvals[i]);
         }
+	    	
+	    	// check for user interrupt
+	    	R_CheckUserInterrupt();
 	    	
 	    	// update search distribution
 	    	cmaes_UpdateDistribution(&evo, funvals);
