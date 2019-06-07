@@ -2,7 +2,7 @@ export(clmp)
 export(print.clmp)
 export(summary.clmp)
 export(plot.clmp)
-
+export(logLik.clmp)
 export(as.phylo.clmp)
 export(midpoint)
 export(midpoint.phylo)

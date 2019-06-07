@@ -116,8 +116,8 @@ plot.clmp <- function(obj, ...) {
     plot.phylo(obj, ...)
   } else {
     df <- fortify(obj)
-    df$cluster <- obj$cluster
-    ggtree(obj, aes(color=df$cluster))
+    df$states <- (obj$states==0)
+    ggtree(obj, aes(color=df$states))
   }
 }
 

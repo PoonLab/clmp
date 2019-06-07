@@ -4,7 +4,7 @@ Title: Genetic clustering by Markov-modulated Poisson process
 Version: 0.0.1
 Date: 2016-10-20
 Author: {Rosemary M McCloskey, Art FY Poon}
-Maintainer: Art FY Poon <artpoon@gmail.com>
+Maintainer: Art FY Poon <apoon42@uwo.ca>
 Depends:
     ape,
     ggtree
@@ -13,3 +13,4 @@ Imports: Rcpp
 Description:  CLustering with Markov-modulated Poisson processes (clmp) is an R package that implements a parametric method for extracting clusters from a phylogeny based on variation in branching rates.
 License: GPL-3
 Encoding: UTF-8
+LazyData: true

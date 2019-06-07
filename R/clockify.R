@@ -2,10 +2,6 @@
 require(MASS)
 require(ape)
 
-Ntip <- function(tr) {
-  length(tr$tip.label)
-}
-
 is.tip <- function(tr) {
   tr$edge[,2] <= Ntip(tr)
 }
