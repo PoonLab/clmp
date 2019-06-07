@@ -21,7 +21,21 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
         stop(".to.newick(): tree argument must be a phylo or character object.")
       }
     }
+    
+    # if tree is class multiPhylo, iterate on all trees
+    else if (class(tree) == 'multiPhylo') {
+      # TODO: option to use mclapply?
+      print(paste("Processing", length(tree), "trees..."))
+      return (lapply (1:length(tree), function(i) {
+        clmp(tree[[i]], nrates=nrates, bounds=bounds, trace=trace,
+             nsites=nsites, min.bl=min.bl)
+      }))
+    }
+    else {
+      stop("argument <tree> must be of class character, phylo or multiphylo")
+    }
   }
+  
   
   # input validation
   stopifnot(is.numeric(nrates), nrates>0)
