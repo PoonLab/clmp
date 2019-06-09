@@ -141,16 +141,15 @@ It is generally easier to install third-party packages and libraries using a pac
     brew install flex
     ```
     
-## clmp Installation Procedure (Ubuntu and Mac):
-
-* Navigate to your preferred location in the filesystem and clone clmp from the GitHhub repository
+5. Navigate to your preferred location in the filesystem and clone clmp from the GitHhub repository
     ```
     git clone https://github.com/PoonLab/clmp
     ```
-* Compile and install the R package `clmp`
+
+6. Compile and install the R package `clmp`
     ```
     autoconf
     ./configure
-    R CMD INSTALL clmp
+    R CMD INSTALL .
     ```
 
