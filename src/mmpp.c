@@ -53,18 +53,18 @@ void calculate_pi(const igraph_t *tree, int nrates, const double *theta,
 void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta);
 int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
              const char *cmaes_settings, int *states, double *loglik,
-             int use_tips, double bounds[4]);
+             int use_tips, double bounds[4], double tol, double tolhist, int seed);
 
 
 double fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
              const char *cmaes_settings, int *states, model_selector sel,
-             int use_tips, double bounds[4])
+             int use_tips, double bounds[4], double tol, double tolhist, int seed)
 {
     int error = 0;
     double loglik;
 
     error = _fit_mmpp(tree, *nrates, *theta, trace, cmaes_settings, states,
-                      &loglik, use_tips, bounds);
+                      &loglik, use_tips, bounds, tol, tolhist, seed);
     if (error) {
       fprintf(stderr, "Warning in fit_mmpp: parameter estimates did not converge\n");
     }
@@ -324,9 +324,9 @@ double reconstruct(const igraph_t *tree, int nrates, const double *theta,
 /* Private. */
 int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
              const char *cmaes_settings, int *states, double *loglik, 
-             int use_tips, double bounds[4])
+             int use_tips, double bounds[4], double tol, double tolhist, int seed)
 {
-    int i, j, step = 0,
+    int i, j, verbose, step = 0,
         dimension = nrates * nrates, error = 0, cur = nrates;
     int *state_order;
     double *lbound = malloc(dimension * sizeof(double));
@@ -356,25 +356,32 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
     for (i = 0; i < dimension; ++i)
         theta[i] = log(theta[i]);
 
-    funvals = cmaes_init(&evo, dimension, theta, init_sd, 0, CMAES_POP_SIZE, cmaes_settings);
+    // seed 0 sets random seed from system clock
+    funvals = cmaes_init(&evo, dimension, theta, init_sd, seed, CMAES_POP_SIZE, 
+                         cmaes_settings, tol, tolhist);
 
   	while (!cmaes_TestForTermination(&evo)) {
         // generate search points
 	    	pop = cmaes_SamplePopulation(&evo);
+  	    verbose = (trace && (step%trace==0));
   	    
+  	    // calculate likelihoods for each search point
 	    	for (i = 0; i < CMAES_POP_SIZE; ++i) {
+	    	    if (verbose)
+	    	        fprintf(stderr, "%d\t%d\t", step, i);
+	    	    
             cmaes_boundary_transformation(&trbound, pop[i], theta, dimension);
             for (j = 0; j < dimension; ++j)
             {
                 theta[j] = exp(theta[j]);
-                if (trace && step%trace == 0)
+                if (verbose)
                     fprintf(stderr, "%f\t", theta[j]);
             }
             funvals[i] = -likelihood(tree, nrates, theta, w, use_tips, 0);
             
             if (funvals[i] != funvals[i])  // detect numeric overflow?
                 funvals[i] = FLT_MAX;
-            if (trace && step%trace == 0)
+            if (verbose)
                 fprintf(stderr, "%f\n", -funvals[i]);
         }
 	    	

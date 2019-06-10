@@ -22,7 +22,7 @@ RcppExport SEXP R_clmp(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_clmp_bipCPP", (DL_FUNC) &_clmp_bipCPP, 2},
-    {"R_clmp",       (DL_FUNC) &R_clmp,       4},
+    {"R_clmp",       (DL_FUNC) &R_clmp,       7},
     {NULL, NULL, 0}
 };
 

@@ -91,7 +91,8 @@ void display_results(int nrates, double *theta, double branch_scale)
 }
 
 
-SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
+SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg, 
+            SEXP tol_arg, SEXP tolhist_arg, SEXP seed_arg) {
     /*
      Implement MMPP method
      @arg nwk:  <input> Newick tree string
@@ -100,11 +101,15 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
                        rates and transition rates
      @arg trace_arg:  <input> integer, write verbose output to stderr
                       if >0.  Also used to set the log interval.
+     @arg tol_arg:  <input> double, set tolerance for CMA-ES method
      */
     SEXP result, cindex, sindex, names, loglik, mle_rates, mle_trans;
 
     int nrates = (int) REAL(nrates_arg)[0];
     int trace = (int) REAL(trace_arg)[0];
+    double tol = (double) REAL(tol_arg)[0];
+    double tolhist = (double) REAL(tolhist_arg)[0];
+    int seed = (int) REAL(seed_arg)[0];
     
     double *theta = malloc(nrates * nrates * sizeof(double));
     int *rate_order = malloc(nrates * sizeof(int));
@@ -141,7 +146,7 @@ SEXP R_clmp(SEXP nwk, SEXP nrates_arg, SEXP bounds_arg, SEXP trace_arg) {
 
     // run MMPP analysis
     REAL(loglik)[0] = fit_mmpp(tree, &nrates, &theta, trace, NULL, 
-         states, LRT, 0, REAL(bounds));
+         states, LRT, 0, REAL(bounds), tol, tolhist, seed);
 
     
     display_results(nrates, theta, 1.);

@@ -1,6 +1,6 @@
 
-clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4), 
-                 trace=FALSE, nsites=NA, min.bl=0.2) {
+clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e3), 
+                 trace=FALSE, nsites=NA, min.bl=0.2, tol=1e-6, tolhist=1e-7, seed=0) {
   # @param tree:  object of class "phylo" (ape package)
   # @param nrates:  number of lineage birth rate classes
   # @param bounds:  vector of length 4, for lower and upper bounds of 
@@ -8,7 +8,9 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   # @param trace:  option to display verbose log of model optimization
   # @param min.bl:  minimum branch length in expected number of 
   #                 substitutions over all sites (full alignment length)
-  
+  # @param tol:  tolerance in objective function for CMA-ES algorithm
+  # @param tolhist:  tolerance in change history of objective function
+  # @param seed:  set random seed for CMA-ES method, default 0 sets random seed
   
   # make sure <tree> is an object of class "phylo"
   if (class(tree) != 'phylo') {
@@ -27,8 +29,9 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
       # TODO: option to use mclapply?
       print(paste("Processing", length(tree), "trees..."))
       return (lapply (1:length(tree), function(i) {
+        # pass along arguments
         clmp(tree[[i]], nrates=nrates, bounds=bounds, trace=trace,
-             nsites=nsites, min.bl=min.bl)
+             nsites=nsites, min.bl=min.bl, tol=tol, tolhist=tolhist, seed=seed)
       }))
     }
     else {
@@ -66,7 +69,10 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e4),
   # serialize tree (defaults to stdout)
   nwk <- write.tree(tree2)
 
-  res <- .Call("R_clmp", nwk, nrates, bounds, as.double(trace), PACKAGE='clmp')
+  res <- .Call("R_clmp", 
+               nwk, nrates, bounds, as.double(trace), 
+               as.double(tol), as.double(tolhist), seed,
+               PACKAGE='clmp')
   
   # unpack outputs
   index <- match(c(tree2$tip.label, tree2$node.label), names(res[[1]]))

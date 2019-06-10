@@ -26,10 +26,12 @@ extern "C" {
 /* --- initialization, constructors, destructors --- */
 double * cmaes_init(cmaes_t *, int dimension , double *xstart, 
 		double *stddev, long seed, int lambda, 
-		const char *input_parameter_filename);
+		const char *input_parameter_filename,
+		double stopTolFun, double stopTolFunHist);
 void cmaes_init_para(cmaes_t *, int dimension , double *xstart, 
 		double *stddev, long seed, int lambda, 
-		const char *input_parameter_filename);
+		const char *input_parameter_filename,
+		double stopTolFun, double stopTolFunHist);
 double * cmaes_init_final(cmaes_t *);
 void cmaes_resume_distribution(cmaes_t *evo_ptr, char *filename);
 void cmaes_exit(cmaes_t *);

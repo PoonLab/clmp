@@ -175,7 +175,7 @@ double cmaes_timings_toc(cmaes_timings_t *timing);
 
 void cmaes_readpara_init (cmaes_readpara_t *, int dim, const double * xstart, 
                     const double * sigma, int seed, int lambda,
-                    const char * filename);
+                    const char * filename, double stopTolFun, double stopTolFunHist);
 void cmaes_readpara_exit(cmaes_readpara_t *);
 void cmaes_readpara_ReadFromFile(cmaes_readpara_t *, const char *szFileName);
 void cmaes_readpara_SupplementDefaults(cmaes_readpara_t *);
@@ -268,11 +268,13 @@ cmaes_init_para(cmaes_t *t, /* "this" */
                 double *inrgstddev, /* initial stds */
                 long int inseed,
                 int lambda, 
-                const char *input_parameter_filename) 
+                const char *input_parameter_filename,
+                double stopTolFun,
+                double stopTolFunHist) 
 {
   t->version = c_cmaes_version;
   cmaes_readpara_init(&t->sp, dimension, inxstart, inrgstddev, inseed, 
-                   lambda, input_parameter_filename);
+                   lambda, input_parameter_filename, stopTolFun, stopTolFunHist);
 }
 
 double * 
@@ -322,7 +324,7 @@ cmaes_init_final(cmaes_t *t /* "this" */)
   for (dtest = 1.; dtest && dtest < 1.1 * dtest; dtest *= 2.) 
     if (dtest == dtest + 1.)
       break;
-  t->dMaxSignifKond = dtest / 1000.; /* not sure whether this is really save, 100 does not work well enough */
+  t->dMaxSignifKond = dtest / 2000.; /* not sure whether this is really save, 100 does not work well enough */
 
   t->gen = 0;
   t->countevals = 0;
@@ -407,10 +409,12 @@ cmaes_init(cmaes_t *t, /* "this" */
                 double *inrgstddev, /* initial stds */
                 long int inseed,
                 int lambda, 
-                const char *input_parameter_filename) 
+                const char *input_parameter_filename,
+                double stopTolFun,
+                double stopTolFunHist) 
 {
   cmaes_init_para(t, dimension, inxstart, inrgstddev, inseed, 
-                   lambda, input_parameter_filename);
+                   lambda, input_parameter_filename, stopTolFun, stopTolFunHist);
   return cmaes_init_final(t);
 }
 
@@ -2495,7 +2499,9 @@ cmaes_readpara_init (cmaes_readpara_t *t,
                const double * inrgsigma,
                int inseed, 
                int lambda, 
-               const char * filename)
+               const char * filename,
+               double stopTolFun,
+               double stopTolFunHist)
 {
   int i, N;
   /* TODO: make sure cmaes_readpara_init has not been called already */
@@ -2553,8 +2559,8 @@ cmaes_readpara_init (cmaes_readpara_t *t,
   t->stopMaxIter = -1;
   t->facmaxeval = 1; 
   t->stStopFitness.flg = -1;
-  t->stopTolFun = 1e-12; 
-  t->stopTolFunHist = 1e-13; 
+  t->stopTolFun = stopTolFun; 
+  t->stopTolFunHist = stopTolFunHist; 
   t->stopTolX = 0; /* 1e-11*insigma would also be reasonable */ 
   t->stopTolUpXFactor = 1e3; 
 
@@ -2826,7 +2832,7 @@ cmaes_readpara_SupplementDefaults(cmaes_readpara_t *t)
     t->diagonalCov = 2 + 100. * N / sqrt((double)t->lambda); 
 
   if (t->stopMaxFunEvals == -1)  /* may depend on ccov in near future */
-    t->stopMaxFunEvals = t->facmaxeval*900*(N+3)*(N+3); 
+    t->stopMaxFunEvals = t->facmaxeval*900*(N+3)*(N+3);   /* set default */
   else
     t->stopMaxFunEvals *= t->facmaxeval;
 

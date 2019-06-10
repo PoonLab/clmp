@@ -28,11 +28,13 @@ typedef struct mmpp_workspace mmpp_workspace;
  * \param[in] bounds lower bound for branching rates, upper bound for branching 
  *                   rates, lower bound for transition rates, upper bound for 
  *                   transition rates
+ * \param[in] tol objective function tolerance for CMA-ES algorithm
+ * \param[in] tolhist tolerance for history of changes in objective function
  * \return log-likelihood (double)
  */
 double fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
         const char *cmaes_settings, int *states, model_selector sel,
-        int use_tips, double bounds[4]);
+        int use_tips, double bounds[4], double tol, double tolhist, int seed);
 
 /** Guess initial parameters for an MMPP.
  *
