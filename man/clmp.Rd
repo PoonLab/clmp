@@ -10,7 +10,8 @@
 
 
 \usage{
-clmp(tree, nrates=2, bounds=c(0, 1e5, 0, 1e5), trace=FALSE, nsites=NA, min.bl=0.2)
+clmp(tree, nrates=2, bounds=c(0, 1e5, 0, 1e5), trace=FALSE, nsites=NA,
+min.bl=0.2, tol=1e-3, tolhist=1e-3, seed=0)
 }
 
 \arguments{
@@ -21,12 +22,19 @@ clmp(tree, nrates=2, bounds=c(0, 1e5, 0, 1e5), trace=FALSE, nsites=NA, min.bl=0.
   
   \item{bounds}{an optional vector of length 4 that specifies the (1) lower and (2) upper bounds for branching rates, and the (3) lower and (4) upper bounds on transition rates. Defaults to (0, 1e5, 0, 1e5).}
   
-  \item{trace}{an optional flag that defaults to FALSE.  If set to TRUE, then the C function \code{_fit_mmpp} will print updates to \code{stderr}.  Use only for debugging or if running \code{clmp} for a very large tree (over 10,000 tips) and you need to monitor progress.  You can also set \code{trace} to an integer value >0 to reduce the amount of \code{stderr} output; for example, \code{trace=10} will only output every 10th line to the \code{stderr} stream.}
+  \item{trace}{an optional flag that defaults to FALSE.  If set to TRUE, then the C function \code{_fit_mmpp} will print updates to \code{stderr}.  Use only for debugging or if running \code{clmp} for a very large tree (over 10,000 tips) and you need to monitor progress.  
+  
+  You can also set \code{trace} to an integer value >0 to reduce the amount of \code{stderr} output; for example, \code{trace=10} will only output every 10th line to the \code{stderr} stream.  Note that a line is printed for every member of the population (defaults to size 100).  The composition of }
   
   \item{nsites}{(optional) sequence (alignment) length in number of sites.  This is used to rescale branch lengths to the expected numbers of substitutions across sites, so that \code{min.bl} can be applied generically to phylogenies reconstructed by maximum likelihood.}
   
   \item{min.bl}{(optional) minimum branch length as expected number of substitutions over all sites (full alignment length).  Used to avoid problems with near-zero branch lengths in trees reconstructed by maximum likelihood.  \code{nsites} must be specified for branches to be adjusted.}
   
+  \item{tol}{(optional) sets CMA-ES optimization tolerance for objective function.  Default set to a relatively high value (1e-3) to adjust for likelihood scaling.  Reduce to smaller values (e.g., 1e-11) if you need greater precision in maximum likelihood parameter estimation.}
+  
+  \item{tolhist}{(optional) sets CMA-ES optimization tolerance in change history of objective function.  Default set to relatively high value (1e-3) to adjust for likelihood scaling.  Reduce to smaller values (e.g., 1e-12) if you need greater precision in maximum likelihood parameter estimation.}
+  
+  \item{seed}{(debugging only)  passes seed value to CMA-ES optimization method. Defaults to 0, which tells CMA-ES to set random seed with system clock.}
 }
 
 
