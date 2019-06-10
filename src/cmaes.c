@@ -324,7 +324,7 @@ cmaes_init_final(cmaes_t *t /* "this" */)
   for (dtest = 1.; dtest && dtest < 1.1 * dtest; dtest *= 2.) 
     if (dtest == dtest + 1.)
       break;
-  t->dMaxSignifKond = dtest / 2000.; /* not sure whether this is really save, 100 does not work well enough */
+  t->dMaxSignifKond = dtest / 1000.; /* not sure whether this is really save, 100 does not work well enough */
 
   t->gen = 0;
   t->countevals = 0;
