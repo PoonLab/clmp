@@ -37,9 +37,10 @@ ui <- fluidPage(
     ),
     
     mainPanel(
+      h4("Tree plot:"),
       plotOutput(outputId="clmpPlot"),
-      h4("Clustering results:"),
-      tableOutput("results"),
+      h4("Summary:"),
+      textOutput("summary"),
       h4("Model selection:"),
       textOutput("dAIC")
     )
@@ -73,6 +74,14 @@ server <- function(input, output, session) {
         # very unlikely to happen
         paste("dAIC =", dAIC, " (models have identical AIC!)")
       }
+    })
+    
+    output$summary <- renderText({
+      n.clusters <- max(v()$res2$clusters)
+      n.in.clusters <- sum(v()$res2$clusters > 0)
+      n <- length(v()$res2$tip.label)
+      paste("Detected ", n.clusters, " cluster", ifelse(n.clusters==1, ".\n", "s.\n"),
+            n.in.clusters, " out of ", n, " individuals assigned to clusters.", sep='')
     })
     
     output$results <- renderTable({
