@@ -28,21 +28,23 @@ ui <- fluidPage(
         height='400px',
         value=default.tree
         ),
-      actionButton(inputId="actButton", label="Submit"),
+      fileInput("nwkFile", "Upload Newick", multiple=FALSE, accept=c('text/plain')),
+      actionButton(inputId="actButton", label="Submit", icon=icon("check"))
+    ),
+    
+    mainPanel(
+      h4("Tree plot:"),
+      plotOutput(outputId="clmpPlot"), #, height='500px'),
+      h4("Summary:"),
+      textOutput("summary"),
+      #h4("Model selection:"),
+      textOutput("dAIC"),
+      downloadButton("csv", label="Download results (CSV)"),
       br(),
       h5("If you use clmp in your work, please cite:"),
       helpText("McCloskey RM, Poon AF. A model-based clustering method to detect 
         infectious disease transmission outbreaks from sequence variation. 
         PLoS Comput Biol. 2017 Nov 13;13(11):e1005868.")
-    ),
-    
-    mainPanel(
-      h4("Tree plot:"),
-      plotOutput(outputId="clmpPlot"),
-      h4("Summary:"),
-      textOutput("summary"),
-      h4("Model selection:"),
-      textOutput("dAIC")
     )
   )
 )
@@ -57,6 +59,13 @@ server <- function(input, output, session) {
       res1 <- clmp(phy, nrates=1)
       res2 <- clmp(phy, nrates=2)
       list(phy=phy, res1=res1, res2=res2)
+    })
+    
+    v <- eventReactive(input$nwkFile, {
+      if (is.null(input$nwkFile)) return(NULL)
+      phy <- read.tree(input$nwkFile)
+      updateTextInput(session, "newick", value=write.tree(phy))
+      list(phy=phy)
     })
     
     output$clmpPlot <- renderPlot({
@@ -77,21 +86,33 @@ server <- function(input, output, session) {
     })
     
     output$summary <- renderText({
-      n.clusters <- max(v()$res2$clusters)
-      n.in.clusters <- sum(v()$res2$clusters > 0)
-      n <- length(v()$res2$tip.label)
-      paste("Detected ", n.clusters, " cluster", ifelse(n.clusters==1, ".\n", "s.\n"),
-            n.in.clusters, " out of ", n, " individuals assigned to clusters.", sep='')
+      clu <- v()$res2$clusters
+      n.clusters <- max(clu)
+      
+      # restrict to tips
+      clu2 <- clu[is.element(names(clu), v()$res2$tip.label)]
+      
+      n.in.clusters <- sum(clu2>0)
+      n <- length(clu2)
+      
+      paste("Detected ", n.clusters, " cluster", 
+            ifelse(n.clusters==1, ". ", "s. "),
+            n.in.clusters, " out of ", n, 
+            " individuals assigned to clusters.",
+            sep='')
     })
     
-    output$results <- renderTable({
-      cls <- v()$res2$clusters
-      cls <- cls[is.element(names(cls), v()$res2$tip.label)]
-      df <- data.frame(
-        label=names(cls)[cls>0],
-        cluster=cls[cls>0]
-      )
-      df[order(df$cluster),]
+    output$csv <- downloadHandler(
+      filename = paste('clmp-', Sys.Date(), '.csv', sep=''),
+      content = function(con) {
+        cls <- v()$res2$clusters
+        cls <- cls[is.element(names(cls), v()$res2$tip.label)]
+        df <- data.frame(
+          label=names(cls)[cls>0],
+          cluster=cls[cls>0]
+        )
+        df <- df[order(df$cluster),]
+        write.csv(df, con, row.names=F)
     })
     #outputOptions(output, "clmpPlot", priority=10)
 }
