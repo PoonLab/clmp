@@ -44,6 +44,7 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e3),
   stopifnot(is.numeric(nrates), nrates>0)
   stopifnot(is.numeric(bounds), length(bounds)==4, all(bounds>=0))
   stopifnot(is.numeric(min.bl), min.bl>=0)
+  stopifnot(!any(is.nan(tree$edge.length)))
 
   # pre-process tree
   tree2 <- multi2di(tree)  # resolve polytomies

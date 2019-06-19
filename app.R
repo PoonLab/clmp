@@ -27,7 +27,7 @@ ui <- fluidPage(
         height='400px',
         value=default.tree
         ),
-      fileInput("nwkFile", "Upload Newick", multiple=FALSE, accept=c('text/plain')),
+      fileInput("nwkFile", "or upload Newick file", multiple=FALSE, accept=c('text/plain')),
       strong(textOutput("errormsg")),
       actionButton(inputId="exampleButton", label="Example", 
                    icon=icon("cat", lib="font-awesome")),
@@ -35,9 +35,9 @@ ui <- fluidPage(
     ),
     
     mainPanel(
-      h4("Tree plot:"),
+      #h4("Tree plot:"),
       plotOutput(outputId="clmpPlot"), #, height='500px'),
-      h4("Summary:"),
+      #h4("Summary:"),
       textOutput("summary"),
       #h4("Model selection:"),
       textOutput("dAIC"),
@@ -57,11 +57,8 @@ server <- function(input, output, session) {
   v <- eventReactive(input$actButton, {
     output$errormsg <- renderText("")
     phy <- read.tree(text=input$newick)
-    if (class(phy) != "phylo") {
-      output$errormsg <- renderText(
-        "Failed to parse text as Newick tree string.")
-      return(NULL)
-    }
+    
+    validate(need(class(phy) == "phylo", "Failed to parse Newick string"))
     
     res1 <- clmp(phy, nrates=1)
     res2 <- clmp(phy, nrates=2)
