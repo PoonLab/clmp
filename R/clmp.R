@@ -1,3 +1,9 @@
+.has.conf.labels <- function(tree) {
+  # attempting to cast character value as numeric raises warning message
+  suppressWarnings(count <- sum(is.na(sapply(tree$node.label, as.numeric))))
+  p <- count / Nnode(tree)
+  (p < 0.1)  # if few NA's, probably has confidence labels
+}
 
 clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e3), 
                  trace=FALSE, nsites=NA, min.bl=0.2, tol=1e-3, tolhist=1e-3, seed=0) {
@@ -56,7 +62,8 @@ clmp <- function(tree, nrates=2, bounds=c(0, 1e4, 0, 1e3),
   tree2$edge.length[tree2$edge.length<0] <- 0  # zero out negative branch lengths
 
   # create arbitrary internal node labels if not already present
-  if(is.null(tree$node.label)) {
+  if(is.null(tree2$node.label) || .has.conf.labels(tree2)) {
+    # Node1 is root
     tree2$node.label <- paste0("Node", 1:Nnode(tree2))
   }
 
