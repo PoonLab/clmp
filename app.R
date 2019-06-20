@@ -55,14 +55,17 @@ ui <- fluidPage(
   
   tags$head(tags$style(
     HTML("textarea{font-family: monospace; font-size: 9px;}
-        #errormsg{color: tomato; font-size: 16px; font-style: bold;}")
+        #msg1,#msg2{color: tomato; font-size: 14px;}
+        #errormsg{color: tomato; font-size: 16px; font-style: bold;}
+        #github{color: white; background-color:grey;}
+        #actButton{color: white; background-color:cadetblue;}")
     )),
   
   titlePanel("clmp: clustering with Markov-modulated Poisson processes"),
   
   sidebarLayout(
     sidebarPanel(
-      h4("Do not submit trees labeled with any potentially 
+      p("Do not submit trees labeled with any potentially 
         identifying information."),
       textAreaInput(
         inputId="newick", 
@@ -70,7 +73,7 @@ ui <- fluidPage(
         height='400px',
         value=default.tree
         ),
-      fileInput("nwkFile", "or upload Newick file", multiple=FALSE, accept=c('text/plain')),
+      fileInput("nwkFile", "Upload Newick file", multiple=FALSE, accept=c('text/plain')),
       strong(textOutput("errormsg")),
       actionButton(inputId="exampleButton", label="Example", 
                    icon=icon("cat", lib="font-awesome")),
@@ -81,7 +84,8 @@ ui <- fluidPage(
       #h4("Tree plot:"),
       plotOutput(outputId="clmpPlot"), #, height='500px'),
       #h4("Summary:"),
-      textOutput("warnings"),
+      textOutput("msg1"),
+      textOutput("msg2"),
       textOutput("summary"),
       #h4("Model selection:"),
       textOutput("dAIC"),
@@ -91,7 +95,10 @@ ui <- fluidPage(
       h5("If you use clmp in your work, please cite:"),
       helpText("McCloskey RM, Poon AF. A model-based clustering method to detect 
         infectious disease transmission outbreaks from sequence variation. 
-        PLoS Comput Biol. 2017 Nov 13;13(11):e1005868.")
+        PLoS Comput Biol. 2017 Nov 13;13(11):e1005868."),
+      actionButton("github", label="Go to GitHub", 
+                   icon("github", lib="font-awesome"),
+                   onclick="window.open('http://github.com/PoonLab/clmp', '_blank')")
     )
   )
 )
@@ -99,7 +106,11 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   # main logic
   v <- eventReactive(input$actButton, {
+    # reset messages
     output$errormsg <- renderText("")
+    output$msg1 <- renderText("")
+    output$msg2 <- renderText("")
+    
     phy <- read.tree(text=input$newick)
     
     validate(need(class(phy) == "phylo", "Failed to parse Newick string"))
@@ -107,13 +118,21 @@ server <- function(input, output, session) {
     phy$node.label <- NULL  # discard internal node labels
     
     validate(need(length(phy$tip.label) < MAXTREESIZE, 
-                  "Sorry, tree is too large.  Please use standalone clmp package in R."))
+                  paste("Sorry, tree is too large (limit ", MAXTREESIZE, 
+                  " tips).  Please use standalone clmp package in R.",
+                  sep='')
+                  ))
     nsites <- detect.ml(phy)
+    if (!is.na(nsites)) {
+      output$msg1 <- renderText(paste(
+        "Warning: detected ML tree - padded near-zero branch lengths to ",
+        1/nsites, sep=''))
+    }
     res1 <- clmp(phy, nrates=1, nsites=nsites)
     res2 <- clmp(phy, nrates=2, nsites=nsites)
     
     list(phy=phy, res1=res1, res2=res2)
-  })
+  }, ignoreNULL=FALSE)
   
   # user resets input to default tree
   observeEvent(
@@ -165,9 +184,10 @@ server <- function(input, output, session) {
     output$summary <- renderText({
       res2 <- v()$res2
       #TODO: check if root state 0
-      validate(need(res2$states["Node1"]==0, 
-                    "Warning: root was assigned to cluster, results from 2-class model are invalid. You may be sampling from a recently expanding epidemic."))
-      
+      if (res2$states["Node1"]!=0) {
+        output$msg2 <- renderText("Warning: root was assigned to cluster, results from 2-class model may be invalid. Tree may be rooted incorrectly, or you may be sampling from a recently expanding epidemic.")
+      } 
+                    
       clu <- res2$clusters
       n.clusters <- max(clu)
       
