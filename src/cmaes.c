@@ -2584,8 +2584,8 @@ cmaes_readpara_init (cmaes_readpara_t *t,
   strcpy(t->resumefile, "_no_");
 
   /* filename == NULL invokes default in cmaes_readpara_Read... */
-  if (!isNoneStr(filename) && (!filename || strcmp(filename, "writeonly") != 0))
-    cmaes_readpara_ReadFromFile(t, filename);
+  //if (!isNoneStr(filename) && (!filename || strcmp(filename, "writeonly") != 0))
+  //  cmaes_readpara_ReadFromFile(t, filename);
 
   if (t->N <= 0)
     t->N = dim;
