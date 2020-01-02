@@ -4,7 +4,7 @@
 Our paper that describes and evaluates MMPP as a model-based clustering method for HIV epidemiology was recently accepted in [PLOS Computational Biology](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005868).
 
 `clmp` is also available as a Shiny web application that you can try out here:
-http://filogeneti.ca:3838/clmp/
+https://filogeneti.ca:3838/clmp/
 
 
 ## Background
